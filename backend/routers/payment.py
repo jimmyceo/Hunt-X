@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request
 from sqlalchemy.orm import Session
 from database import get_db, User
+from pydantic import BaseModel
 import stripe
 import os
 
@@ -9,19 +10,41 @@ router = APIRouter(prefix="/api/payment", tags=["payment"])
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
 
-PRICE_ID = "price_1234567890"  # TODO: Create in Stripe Dashboard
+# Price IDs from Stripe Dashboard
+ONE_TIME_PRICE = 4900  # €49 in cents
+MONTHLY_PRICE = 2900   # €29 in cents
+
+class CheckoutRequest(BaseModel):
+    email: str
+    plan: str  # 'lifetime' or 'monthly'
 
 @router.post("/create-checkout")
-async def create_checkout(email: str, db: Session = Depends(get_db)):
-    """Create Stripe Checkout session for €49 one-time payment"""
+async def create_checkout(req: CheckoutRequest, db: Session = Depends(get_db)):
+    """Create Stripe Checkout session for selected plan"""
     
     # Create or get user
-    user = db.query(User).filter(User.email == email).first()
+    user = db.query(User).filter(User.email == req.email).first()
     if not user:
         from uuid import uuid4
-        user = User(id=str(uuid4()), email=email)
+        user = User(
+            id=str(uuid4()), 
+            email=req.email,
+            plan='free'
+        )
         db.add(user)
         db.commit()
+    
+    # Determine price and mode
+    if req.plan == 'monthly':
+        mode = 'subscription'
+        price_cents = MONTHLY_PRICE
+        product_name = 'Hunt-X Pro Monthly'
+        description = 'Unlimited CV generations, AI analysis, tracker (€29/month)'
+    else:  # lifetime
+        mode = 'payment'
+        price_cents = ONE_TIME_PRICE
+        product_name = 'Hunt-X Lifetime Pro'
+        description = 'Unlimited CV generations, AI analysis, tracker (One-time €49)'
     
     # Create Stripe Checkout session
     try:
@@ -31,21 +54,26 @@ async def create_checkout(email: str, db: Session = Depends(get_db)):
                 'price_data': {
                     'currency': 'eur',
                     'product_data': {
-                        'name': 'Hunt-X Lifetime Access',
-                        'description': 'Unlimited CV generations, AI resume analysis, application tracker'
+                        'name': product_name,
+                        'description': description
                     },
-                    'unit_amount': 4900,  # €49.00 in cents
+                    'unit_amount': price_cents,
+                    **({'recurring': {'interval': 'month'}} if mode == 'subscription' else {})
                 },
                 'quantity': 1,
             }],
-            mode='payment',
-            success_url='https://careerpilot.app/dashboard?payment=success',
-            cancel_url='https://careerpilot.app/?payment=cancelled',
-            customer_email=email,
-            metadata={'user_id': user.id}
+            mode=mode,
+            success_url='https://hunt-x.app/dashboard?payment=success',
+            cancel_url='https://hunt-x.app/pricing?cancelled',
+            customer_email=req.email,
+            metadata={'user_id': user.id, 'plan': req.plan}
         )
         
-        return {"checkout_url": session.url, "session_id": session.id}
+        return {
+            "checkout_url": session.url, 
+            "session_id": session.id,
+            "plan": req.plan
+        }
     
     except Exception as e:
         raise HTTPException(500, str(e))
@@ -69,20 +97,60 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
         user_id = session['metadata'].get('user_id')
+        plan = session['metadata'].get('plan', 'lifetime')
         
         user = db.query(User).filter(User.id == user_id).first()
         if user:
             user.stripe_payment_status = 'completed'
             user.stripe_customer_id = session.get('customer')
+            user.plan = plan
+            db.commit()
+    
+    # Handle subscription cancellation
+    if event['type'] == 'customer.subscription.deleted':
+        subscription = event['data']['object']
+        user = db.query(User).filter(
+            User.stripe_customer_id == subscription['customer']
+        ).first()
+        if user:
+            user.plan = 'free'
+            user.stripe_payment_status = 'cancelled'
             db.commit()
     
     return {"status": "success"}
 
 @router.get("/status/{email}")
 async def check_payment_status(email: str, db: Session = Depends(get_db)):
-    """Check if user has paid"""
+    """Check user's plan and payment status"""
     user = db.query(User).filter(User.email == email).first()
     if not user:
-        return {"paid": False}
+        return {
+            "plan": "free",
+            "paid": False,
+            "cvs_remaining": 1,  # 1 free CV for trial
+            "features": ["1 free CV generation", "Basic resume upload"]
+        }
     
-    return {"paid": user.stripe_payment_status == 'completed'}
+    # Freemium limits
+    free_limits = {
+        "cvs_remaining": 1,
+        "features": ["1 free CV generation", "Basic resume upload"]
+    }
+    
+    pro_limits = {
+        "cvs_remaining": -1,  # unlimited
+        "features": [
+            "Unlimited CV generations",
+            "AI resume analysis", 
+            "Application tracker",
+            "Priority support"
+        ]
+    }
+    
+    is_paid = user.stripe_payment_status == 'completed'
+    
+    return {
+        "plan": user.plan if is_paid else "free",
+        "paid": is_paid,
+        **(pro_limits if is_paid else free_limits)
+    }
