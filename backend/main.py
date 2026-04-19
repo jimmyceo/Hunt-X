@@ -6,11 +6,9 @@ import uvicorn
 import os
 import uuid
 from pathlib import Path
-import sys
 from datetime import datetime
 
-sys.path.append('/data/.openclaw/workspace/empire/agents')
-from company_config import kimi_query, notify
+from ai_client import kimi_query, notify
 from database import init_db, get_db, User, Resume, CV
 from services.pdf_generator import generate_pdf_from_html
 
