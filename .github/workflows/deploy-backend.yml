@@ -15,21 +15,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy to Railway via API
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
-          # Install Railway CLI
-          npm install -g @railway/cli
+          # Navigate to project root
+          cd $GITHUB_WORKSPACE
           
-          # Login with token
-          mkdir -p ~/.railway
-          echo '{"token":"'$RAILWAY_TOKEN'"}' > ~/.railway/config.json
+          # Try to init project (will fail if exists, that's ok)
+          railway init --name "Hunt-X" 2>/dev/null || true
           
-          # Try to deploy with error handling
-          railway up 2>&1 || {
-            echo "Railway deploy failed - trying alternative..."
-            # Try creating project if it doesn't exist
-            railway init --name Hunt-X 2>&1 || true
-            railway up
-          }
+          # Deploy
+          railway up --detach

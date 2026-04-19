@@ -1,1 +1,1 @@
-# Trigger deploy on $(date)
+# Deploy trigger - $(date)
