@@ -1,12 +1,16 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 import uvicorn
 import os
+import uuid
 from pathlib import Path
 import sys
+from datetime import datetime
 
 sys.path.append('/data/.openclaw/workspace/empire/agents')
-from company_config import kimi_query
+from company_config import kimi_query, notify
+from database import init_db, get_db, User, Resume, CV
 
 app = FastAPI(title="CareerPilot API", version="0.1.0")
 
@@ -21,68 +25,159 @@ app.add_middleware(
 UPLOAD_DIR = Path("/data/.openclaw/workspace/empire/careerpilot/uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-@app.post("/api/analyze-resume")
-async def analyze_resume(file: UploadFile = File(...)):
-    """Upload and analyze resume with AI"""
+def extract_text_from_file(file_path: str) -> str:
+    """Extract text from PDF, DOC, DOCX, or TXT"""
+    # TODO: Implement proper extraction
+    # For MVP, return placeholder
+    return "Resume text extracted from file"
+
+@app.post("/api/resume/upload")
+async def upload_resume(
+    email: str,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    """Upload resume and create user if needed"""
     if not file.filename.endswith(('.pdf', '.doc', '.docx', '.txt')):
         raise HTTPException(400, "Only PDF, DOC, DOCX, TXT files allowed")
     
+    # Create or get user
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        user = User(id=str(uuid.uuid4()), email=email)
+        db.add(user)
+        db.commit()
+    
     # Save file
-    file_path = UPLOAD_DIR / file.filename
+    file_id = str(uuid.uuid4())
+    file_path = UPLOAD_DIR / f"{file_id}_{file.filename}"
     with open(file_path, "wb") as f:
         content = await file.read()
         f.write(content)
     
-    # TODO: Extract text from PDF/DOC
-    # For MVP, assume text extraction works
+    # Create resume record
+    resume = Resume(
+        id=file_id,
+        user_id=user.id,
+        file_path=str(file_path),
+        file_name=file.filename
+    )
+    db.add(resume)
+    db.commit()
+    
+    return {
+        "status": "success",
+        "resume_id": file_id,
+        "user_id": user.id,
+        "message": "Resume uploaded successfully"
+    }
+
+@app.post("/api/resume/analyze")
+async def analyze_resume(resume_id: str, db: Session = Depends(get_db)):
+    """Analyze resume with AI"""
+    resume = db.query(Resume).filter(Resume.id == resume_id).first()
+    if not resume:
+        raise HTTPException(404, "Resume not found")
+    
+    # Extract text
+    resume_text = extract_text_from_file(resume.file_path)
     
     # AI Analysis
-    prompt = """Analyze this resume and extract:
-    1. Key skills (technical and soft)
-    2. Years of experience
+    prompt = f"""Analyze this resume and extract:
+    1. Key skills (technical and soft) - top 10
+    2. Years of experience (total)
     3. Industry focus
-    4. Seniority level
+    4. Seniority level (junior/mid/senior)
     5. Suggested job titles to target
+    6. Key strengths
+    7. Areas for improvement
+    
+    Resume text: {resume_text}
     
     Return as JSON."""
     
-    analysis = kimi_query(prompt, system="You are an expert resume analyst and career coach.")
+    analysis_text = kimi_query(prompt, system="You are an expert resume analyst and career coach.")
+    
+    # Parse JSON from response
+    import json
+    try:
+        analysis = json.loads(analysis_text)
+    except:
+        analysis = {"raw_analysis": analysis_text}
+    
+    # Save analysis
+    resume.ai_analysis = analysis
+    db.commit()
     
     return {
         "status": "success",
-        "filename": file.filename,
-        "analysis": analysis,
-        "file_path": str(file_path)
+        "resume_id": resume_id,
+        "analysis": analysis
     }
 
-@app.post("/api/generate-cv")
-async def generate_cv(resume_text: str, job_description: str):
-    """Generate tailored CV for specific job"""
+@app.post("/api/cv/generate")
+async def generate_cv(
+    resume_id: str,
+    job_title: str,
+    company: str,
+    job_description: str,
+    db: Session = Depends(get_db)
+):
+    """Generate tailored CV"""
+    resume = db.query(Resume).filter(Resume.id == resume_id).first()
+    if not resume:
+        raise HTTPException(404, "Resume not found")
     
-    prompt = f"""Given this resume:
-    {resume_text}
+    # Get resume text
+    resume_text = extract_text_from_file(resume.file_path)
     
-    And this job description:
-    {job_description}
+    # Generate CV with AI
+    prompt = f"""You are an expert CV writer specializing in ATS-optimized resumes.
+
+Given:
+- Resume: {resume_text}
+- Job Description: {job_description}
+- Job Title: {job_title}
+- Company: {company}
+
+Generate an ATS-optimized CV in HTML format that:
+1. Matches keywords from the job description
+2. Highlights the most relevant experience
+3. Uses professional, clean formatting
+4. Includes quantifiable achievements
+5. Is tailored specifically for this role
+
+Return ONLY the HTML content."""
     
-    Generate an ATS-optimized CV that:
-    1. Matches keywords from job description
-    2. Highlights relevant experience
-    3. Uses professional formatting
-    4. Includes quantifiable achievements
+    cv_html = kimi_query(prompt, system="You are an expert CV writer.")
     
-    Return as HTML formatted CV."""
-    
-    cv_html = kimi_query(prompt, system="You are an expert CV writer specializing in ATS-optimized resumes.")
+    # Save CV
+    cv_id = str(uuid.uuid4())
+    cv = CV(
+        id=cv_id,
+        user_id=resume.user_id,
+        resume_id=resume_id,
+        job_title=job_title,
+        company=company,
+        job_description=job_description,
+        cv_html=cv_html
+    )
+    db.add(cv)
+    db.commit()
     
     return {
         "status": "success",
+        "cv_id": cv_id,
         "cv_html": cv_html
     }
 
 @app.get("/api/health")
 async def health():
     return {"status": "ok", "version": "0.1.0"}
+
+@app.on_event("startup")
+async def startup():
+    init_db()
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
