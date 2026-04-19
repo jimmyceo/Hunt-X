@@ -8,7 +8,7 @@
 3. Click "Add New Project"
 
 ### Step 2: Import Repo
-1. Select `jimmyceo/careerpilot` from the list
+1. Select `jimmyceo/Hunt-X` from the list
 2. Configure:
    - **Framework Preset**: Next.js
    - **Root Directory**: `frontend`

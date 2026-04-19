@@ -10,7 +10,7 @@
 
 **Your Job:** Continue building Hunt-X based on this spec.  
 **Timeline:** 3 days to MVP launch.  
-**Repo:** https://github.com/jimmyceo/careerpilot
+**Repo:** https://github.com/jimmyceo/Hunt-X
 
 ---
 
