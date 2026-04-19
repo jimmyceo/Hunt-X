@@ -17,6 +17,7 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     stripe_customer_id = Column(String)
     stripe_payment_status = Column(String, default='pending')
+    plan = Column(String, default='free')  # free, monthly, lifetime
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
