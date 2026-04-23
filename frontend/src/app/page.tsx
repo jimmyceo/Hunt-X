@@ -15,8 +15,8 @@ export default function Home() {
         
         {/* CTA */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <a
-            href="/auth"
+          <a 
+            href="/auth" 
             className="px-8 py-4 bg-blue-500 hover:bg-blue-600 rounded-lg font-semibold text-lg transition"
           >
             Get Started Free
@@ -65,7 +65,7 @@ export default function Home() {
             <li>✓ No subscription</li>
           </ul>
           <a 
-            href="/upload"
+            href="/auth"
             className="block w-full py-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-semibold transition"
           >
             Buy Now

@@ -1,18 +1,12 @@
-// API client configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hunt-x-production-2954.up.railway.app';
 
 export const setAuthToken = (token: string | null) => {
-  if (typeof window !== 'undefined' && token) {
-    localStorage.setItem('token', token);
-  } else if (typeof window !== 'undefined') {
-    localStorage.removeItem('token');
-  }
+  if (typeof window !== 'undefined' && token) localStorage.setItem('token', token);
+  else if (typeof window !== 'undefined') localStorage.removeItem('token');
 };
 
 export const getAuthToken = (): string | null => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('token');
-  }
+  if (typeof window !== 'undefined') return localStorage.getItem('token');
   return null;
 };
 
@@ -55,7 +49,6 @@ export const apiClient = {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('email', email);
-
     const res = await fetch(`${API_BASE_URL}/api/resume/upload`, {
       method: 'POST',
       headers: token ? { 'Authorization': `Bearer ${token}` } : {},
