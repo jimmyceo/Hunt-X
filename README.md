@@ -1,38 +1,55 @@
 # Hunt-X
-## AI-Powered Job Search Copilot
 
-Auto-find jobs, generate tailored CVs, track applications — all with AI.
-
----
+AI-Powered Job Search Copilot — Auto-find jobs, generate tailored CVs, track applications.
 
 ## Features
 
 - 🤖 **AI Resume Analysis** — Upload your resume, get optimization suggestions
-- 🔍 **Job Scanner** — Auto-finds matching jobs from top portals (Greenhouse, Ashby, Lever)
-- 📝 **Auto-Apply** — Generates tailored CV + cover letter for each job
+- 📝 **Tailored CV Generation** — Generate ATS-optimized CVs for any job
 - 📊 **Application Tracker** — Dashboard to manage all applications
-- 🎯 **Interview Prep** — AI-generated company research and questions
-
----
+- 💳 **Subscription Plans** — Free, Starter (€9), Pro (€29), Team (€49)
 
 ## Tech Stack
 
 - **Frontend:** Next.js 14 + Tailwind CSS
 - **Backend:** Python FastAPI
 - **AI:** Ollama Cloud (Kimi models)
-- **Database:** Supabase (PostgreSQL)
+- **Database:** SQLite (PostgreSQL ready)
 - **Auth:** Supabase Auth
-- **Storage:** Supabase Storage
 - **Payments:** Stripe
-- **PDF Generation:** Playwright
-- **Job Scanning:** Career-ops integration
 
----
+## Quick Start
 
-## Status
+### Backend
+```bash
+cd backend
+pip install -r requirements.txt
+python main.py
+# Runs on http://localhost:8000
+```
 
-🚧 **In Development** — Expected launch: 7 days
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+# Runs on http://localhost:3000
+```
 
----
+## Environment Variables
 
-*Built on top of career-ops by santifer*
+Create `.env` in backend:
+```
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+DATABASE_URL=sqlite:///./hunt_x.db
+```
+
+## Documentation
+
+- [Stripe Integration Guide](STRIPE_INTEGRATION_GUIDE.md)
+- [SaaS Strategy](.github/SAAS_TRANSFORMATION_STRATEGY.md)
+
+## License
+
+MIT
