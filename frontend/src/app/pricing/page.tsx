@@ -120,11 +120,11 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const }
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] }
   }
 };
 
-export default function PricingPage() {
+export function PricingPage() {
   const [isYearly, setIsYearly] = useState(false);
   const [hoveredTier, setHoveredTier] = useState<string | null>(null);
 

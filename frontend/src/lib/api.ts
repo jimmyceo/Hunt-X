@@ -1,11 +1,7 @@
 // API client configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hunt-x-production-2954.up.railway.app';
 
-// Store token in memory (or localStorage for persistence)
-let authToken: string | null = null;
-
 export const setAuthToken = (token: string | null) => {
-  authToken = token;
   if (typeof window !== 'undefined' && token) {
     localStorage.setItem('token', token);
   } else if (typeof window !== 'undefined') {
@@ -14,7 +10,6 @@ export const setAuthToken = (token: string | null) => {
 };
 
 export const getAuthToken = (): string | null => {
-  if (authToken) return authToken;
   if (typeof window !== 'undefined') {
     return localStorage.getItem('token');
   }
@@ -24,7 +19,6 @@ export const getAuthToken = (): string | null => {
 export const apiClient = {
   baseURL: API_BASE_URL,
 
-  // Authentication
   async register(email: string, password: string, name?: string) {
     const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
       method: 'POST',
@@ -32,9 +26,7 @@ export const apiClient = {
       body: JSON.stringify({ email, password, name }),
     });
     const data = await res.json();
-    if (data.access_token) {
-      setAuthToken(data.access_token);
-    }
+    if (data.access_token) setAuthToken(data.access_token);
     return data;
   },
 
@@ -45,16 +37,13 @@ export const apiClient = {
       body: JSON.stringify({ email, password }),
     });
     const data = await res.json();
-    if (data.access_token) {
-      setAuthToken(data.access_token);
-    }
+    if (data.access_token) setAuthToken(data.access_token);
     return data;
   },
 
   async getCurrentUser() {
     const token = getAuthToken();
     if (!token) throw new Error('Not authenticated');
-
     const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
       headers: { 'Authorization': `Bearer ${token}` },
     });
