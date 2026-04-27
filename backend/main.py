@@ -8,6 +8,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 import os
 
+# Load environment variables before other imports
+from dotenv import load_dotenv
+load_dotenv()
+
 # Import models and initialize
 from models import engine, Base
 from models import (
@@ -37,10 +41,17 @@ app = FastAPI(
     version="0.2.0"
 )
 
-# CORS middleware
+# CORS middleware - configurable origins for security
+_cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
+# Allow all in development; restrict in production
+if os.getenv("ENVIRONMENT", "development").lower() == "production":
+    allowed_origins = [origin.strip() for origin in _cors_origins.split(",") if origin.strip()]
+else:
+    allowed_origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

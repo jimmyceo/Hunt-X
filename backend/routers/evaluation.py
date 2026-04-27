@@ -243,11 +243,10 @@ async def create_evaluation(
     db.commit()
     db.refresh(evaluation)
 
-    # Decrement job counter in background
+    # Decrement job counter in background (use fresh session)
     background_tasks.add_task(
         _decrement_job_counter,
-        user.id,
-        db
+        user.id
     )
 
     # Build response
@@ -472,11 +471,18 @@ def _db_to_response(evaluation: Evaluation) -> EvaluationResponse:
     )
 
 
-def _decrement_job_counter(user_id: str, db: Session):
-    """Decrement user's job counter"""
+def _decrement_job_counter(user_id: str):
+    """Decrement user's job counter using a fresh database session."""
+    from database import SessionLocal
     from models import User
-
-    user = db.query(User).filter(User.id == user_id).first()
-    if user and user.jobs_remaining > 0:
-        user.jobs_remaining -= 1
-        db.commit()
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.id == user_id).first()
+        if user and user.jobs_remaining > 0:
+            user.jobs_remaining -= 1
+            db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"Error decrementing job counter: {e}")
+    finally:
+        db.close()

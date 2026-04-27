@@ -15,7 +15,7 @@ AI-Powered Job Search Copilot — Auto-find jobs, generate tailored CVs, track a
 - **Backend:** Python FastAPI
 - **AI:** Ollama Cloud (Kimi models)
 - **Database:** SQLite (PostgreSQL ready)
-- **Auth:** Supabase Auth
+- **Auth:** JWT-based (custom implementation with bcrypt + python-jose)
 - **Payments:** Stripe
 
 ## Quick Start

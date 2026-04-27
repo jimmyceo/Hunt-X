@@ -67,8 +67,8 @@ async def register(
             email=user_data.email,
             password_hash=get_password_hash(truncated_password),
             name=user_data.name,
-            tier="try",
-            jobs_remaining=5  # Free tier gets 5 jobs
+            tier="free",
+            jobs_remaining=5
         )
 
         db.add(user)

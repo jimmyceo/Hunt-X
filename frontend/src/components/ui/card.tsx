@@ -1,7 +1,6 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface CardProps {
@@ -13,22 +12,22 @@ interface CardProps {
 
 export function Card({ children, className, variant = 'default', hover = true }: CardProps) {
   const variants = {
-    default: 'bg-slate-900/50 border border-slate-800',
-    highlighted: 'bg-gradient-to-b from-indigo-500/20 to-slate-900/50 border-2 border-indigo-500/50',
-    glass: 'bg-slate-900/30 backdrop-blur-sm border border-slate-700/50'
+    default: 'bg-white border border-[#e5edf5]',
+    highlighted: 'bg-gradient-to-b from-[#533afd]/10 to-white border-2 border-[#533afd]/30',
+    glass: 'bg-white/80 backdrop-blur-sm border border-[#e5edf5]/80'
   };
 
   return (
-    <motion.div
-      whileHover={hover ? { y: -4, transition: { duration: 0.2 } } : undefined}
+    <div
       className={cn(
-        'rounded-2xl p-6 transition-all duration-300',
+        'rounded-xl p-6 transition-all duration-300',
+        hover && 'hover:-translate-y-1 hover:shadow-[0_15px_35px_rgba(23,23,23,0.08)]',
         variants[variant],
         className
       )}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -42,13 +41,13 @@ export function CardHeader({ title, subtitle, icon }: CardHeaderProps) {
   return (
     <div className="flex items-start gap-4 mb-4">
       {icon && (
-        <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400">
+        <div className="w-10 h-10 rounded-lg bg-[#f6f9fc] flex items-center justify-center text-[#64748d]">
           {icon}
         </div>
       )}
       <div>
-        <h3 className="font-semibold text-lg">{title}</h3>
-        {subtitle && <p className="text-sm text-slate-400">{subtitle}</p>}
+        <h3 className="font-normal text-lg text-[#061b31]">{title}</h3>
+        {subtitle && <p className="text-sm text-[#64748d]">{subtitle}</p>}
       </div>
     </div>
   );

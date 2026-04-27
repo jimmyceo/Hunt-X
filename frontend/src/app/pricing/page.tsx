@@ -1,390 +1,291 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Zap,
-  Check,
-  X,
-  Users,
-  Sparkles,
-  ArrowRight,
-  CreditCard,
-  FileText,
-  Brain,
-  Shield
-} from 'lucide-react';
+import { useState } from 'react'
+import Link from 'next/link'
 
-// ============ PRICING PAGE ============
-
-interface PricingTier {
-  id: string;
-  name: string;
-  monthlyPrice: number;
-  yearlyPrice: number;
-  description: string;
-  features: string[];
-  notIncluded?: string[];
-  highlighted?: boolean;
-  badge?: string;
-  cta: string;
-  icon: React.ReactNode;
-}
-
-const pricingTiers: PricingTier[] = [
+const plans = [
   {
-    id: 'free',
     name: 'Free',
     monthlyPrice: 0,
     yearlyPrice: 0,
     description: 'Perfect for trying out Hunt-X',
     features: [
-      '1 CV generation/month',
-      '2 resume uploads',
-      'Basic AI analysis',
-      'Watermarked PDF exports',
-      'Email support'
+      { text: '5 job scans per month', included: true },
+      { text: '1 CV generation', included: true },
+      { text: 'Basic resume analysis', included: true },
+      { text: 'Email support', included: true },
+      { text: 'Cover letter generation', included: false },
+      { text: 'Interview prep', included: false },
+      { text: 'Application tracker', included: false },
+      { text: 'Priority support', included: false },
     ],
     cta: 'Get Started',
-    icon: <Sparkles className="w-5 h-5" />
+    ctaStyle: 'ghost' as const,
   },
   {
-    id: 'starter',
     name: 'Starter',
     monthlyPrice: 9,
     yearlyPrice: 90,
     description: 'For active job seekers',
     features: [
-      '10 CV generations/month',
-      '10 resume uploads',
-      'Full AI analysis',
-      'No watermarks',
-      'DOCX export',
-      'Priority email support'
+      { text: '20 job scans per month', included: true },
+      { text: '5 CV generations', included: true },
+      { text: 'Full resume analysis', included: true },
+      { text: 'Cover letter generation', included: true },
+      { text: 'Priority email support', included: true },
+      { text: 'Interview prep', included: false },
+      { text: 'Application tracker', included: false },
+      { text: 'API access', included: false },
     ],
-    cta: 'Start with Starter',
-    icon: <FileText className="w-5 h-5" />
+    cta: 'Start Starter',
+    ctaStyle: 'primary' as const,
   },
   {
-    id: 'pro',
     name: 'Pro',
     monthlyPrice: 29,
     yearlyPrice: 290,
     description: 'For serious job hunters',
-    highlighted: true,
-    badge: 'Most Popular',
+    featured: true,
     features: [
-      'Unlimited CV generations',
-      'Unlimited resume uploads',
-      'Cover letter generation',
-      'Interview prep AI',
-      'Analytics dashboard',
-      'API access (1,000 req/month)',
-      'Priority processing'
+      { text: 'Unlimited job scans', included: true },
+      { text: 'Unlimited CV generations', included: true },
+      { text: 'Advanced AI resume scoring', included: true },
+      { text: 'Unlimited cover letters', included: true },
+      { text: 'Interview prep & mock questions', included: true },
+      { text: 'Application tracker', included: true },
+      { text: 'Priority chat support', included: true },
+      { text: 'API access', included: false },
     ],
-    cta: 'Go Pro',
-    icon: <Zap className="w-5 h-5" />
+    cta: 'Start Pro',
+    ctaStyle: 'primary' as const,
   },
   {
-    id: 'team',
     name: 'Team',
     monthlyPrice: 49,
     yearlyPrice: 490,
-    description: 'For career coaches & agencies',
+    description: 'For teams & career coaches',
     features: [
-      'Everything in Pro',
-      'Client management',
-      'White-label exports',
-      'Team collaboration',
-      'Admin analytics',
-      'Dedicated support',
-      'API access (10,000 req/month)'
+      { text: 'Everything in Pro', included: true },
+      { text: 'Up to 5 team members', included: true },
+      { text: 'Shared job boards', included: true },
+      { text: 'Team analytics dashboard', included: true },
+      { text: 'Dedicated account manager', included: true },
+      { text: 'API access', included: true },
+      { text: 'White-label exports', included: true },
+      { text: 'Admin analytics', included: true },
     ],
     cta: 'Contact Sales',
-    icon: <Users className="w-5 h-5" />
-  }
-];
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const }
-  }
-};
+    ctaStyle: 'ghost-dark' as const,
+  },
+]
 
 export default function PricingPage() {
-  const [isYearly, setIsYearly] = useState(false);
-  const [hoveredTier, setHoveredTier] = useState<string | null>(null);
+  const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly')
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white overflow-x-hidden">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-500/5 rounded-full blur-3xl" />
-      </div>
-
-      {/* Navigation */}
-      <nav className="relative z-10 flex items-center justify-between px-6 py-6 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-lg flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-white" />
+    <main className="min-h-screen bg-white text-[#061b31]">
+      {/* Header */}
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#e5edf5]">
+        <div className="max-w-[1080px] mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href="/" className="text-xl font-normal tracking-tight" style={{ fontFamily: 'sohne-var, SF Pro Display, system-ui, sans-serif' }}>
+            Hunt-X
+          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/auth" className="text-sm px-4 py-2 text-[#061b31] hover:bg-[#f6f9fc] rounded transition">
+              Sign In
+            </Link>
+            <Link href="/upload" className="text-sm px-4 py-2 bg-[#533afd] text-white rounded hover:bg-[#4338ca] transition">
+              Get Started
+            </Link>
           </div>
-          <span className="text-xl font-bold">Hunt-X</span>
-        </div>
-        <div className="flex items-center gap-6 text-sm text-slate-400">
-          <a href="/features" className="hover:text-white transition-colors">Features</a>
-          <a href="/pricing" className="text-white">Pricing</a>
-          <a href="/about" className="hover:text-white transition-colors">About</a>
-          <button className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors">
-            Sign In
-          </button>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative z-10 px-6 pt-16 pb-20 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6">
-            <span className="bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-              Simple Pricing
-            </span>
+      {/* Hero */}
+      <section className="pt-16 pb-12 text-center">
+        <div className="max-w-[1080px] mx-auto px-4">
+          <span className="text-xs text-[#64748d] uppercase tracking-wider">Pricing</span>
+          <h1 className="text-4xl md:text-5xl font-light mt-4 mb-4 text-[#061b31]" style={{ letterSpacing: '-0.96px' }}>
+            Simple Pricing, Powerful Results
           </h1>
-          <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-8">
-            Choose the plan that fits your job search. Upgrade or downgrade anytime.
+          <p className="text-lg text-[#64748d] mb-8">
+            Start free. Upgrade when you are ready to accelerate your job search.
           </p>
-        </motion.div>
 
-        {/* Billing Toggle */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="flex items-center justify-center gap-4"
-        >
-          <span className={`text-sm transition-colors ${!isYearly ? 'text-white' : 'text-slate-500'}`}>
-            Monthly
-          </span>
-          <button
-            onClick={() => setIsYearly(!isYearly)}
-            className="relative w-14 h-7 bg-slate-800 rounded-full p-1 transition-colors"
-          >
-            <motion.div
-              className="w-5 h-5 bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-full"
-              animate={{ x: isYearly ? 28 : 0 }}
-              transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            />
-          </button>
-          <span className={`text-sm transition-colors ${isYearly ? 'text-white' : 'text-slate-500'}`}>
-            Yearly
-          </span>
-          {isYearly && (
-            <motion.span
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="px-2 py-1 text-xs bg-emerald-500/20 text-emerald-400 rounded-full"
+          {/* Billing Toggle */}
+          <div className="inline-flex items-center gap-2 p-1 bg-[#f6f9fc] rounded-lg">
+            <button
+              onClick={() => setBilling('monthly')}
+              className={`px-4 py-2 text-sm rounded transition ${billing === 'monthly' ? 'bg-[#061b31] text-white' : 'text-[#64748d] hover:text-[#061b31]'}`}
             >
-              Save 2 months
-            </motion.span>
+              Monthly
+            </button>
+            <button
+              onClick={() => setBilling('yearly')}
+              className={`px-4 py-2 text-sm rounded transition ${billing === 'yearly' ? 'bg-[#061b31] text-white' : 'text-[#64748d] hover:text-[#061b31]'}`}
+            >
+              Yearly
+            </button>
+          </div>
+          {billing === 'yearly' && (
+            <p className="text-xs text-[#15be53] mt-2">Save 2 months free with yearly billing</p>
           )}
-        </motion.div>
+        </div>
       </section>
 
       {/* Pricing Cards */}
-      <section className="relative z-10 px-6 pb-20">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto"
-        >
-          {pricingTiers.map((tier) => (
-            <motion.div
-              key={tier.id}
-              variants={itemVariants}
-              onMouseEnter={() => setHoveredTier(tier.id)}
-              onMouseLeave={() => setHoveredTier(null)}
-              className={`relative rounded-2xl p-6 transition-all duration-300 ${
-                tier.highlighted
-                  ? 'bg-gradient-to-b from-indigo-500/20 to-slate-900/50 border-2 border-indigo-500/50 scale-105'
-                  : 'bg-slate-900/50 border border-slate-800 hover:border-slate-700'
-              } ${hoveredTier === tier.id ? 'transform -translate-y-1' : ''}`}
-            >
-              {/* Badge */}
-              {tier.badge && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="px-3 py-1 text-xs font-medium bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-full">
-                    {tier.badge}
-                  </span>
+      <section className="pb-16">
+        <div className="max-w-[1080px] mx-auto px-4">
+          <div className="grid md:grid-cols-4 gap-4">
+            {plans.map((plan) => {
+              const price = billing === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice
+              const period = billing === 'monthly' ? '/mo' : '/year'
+              return (
+                <div
+                  key={plan.name}
+                  className={`relative p-8 rounded-lg border bg-white flex flex-col ${
+                    plan.featured
+                      ? 'border-t-4 border-t-[#533afd] border-[#e5edf5] shadow-[0_30px_45px_-30px_rgba(50,50,93,0.25)]'
+                      : 'border-[#e5edf5]'
+                  }`}
+                >
+                  {plan.featured && (
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 text-[10px] font-normal bg-[#533afd] text-white rounded">
+                      MOST POPULAR
+                    </span>
+                  )}
+                  <div className={`text-sm mb-2 ${plan.name === 'Starter' || plan.name === 'Pro' ? 'text-[#533afd]' : 'text-[#64748d]'}`}>
+                    {plan.name}
+                  </div>
+                  <div className="text-5xl font-light text-[#061b31] mb-1">
+                    &euro;{price}
+                  </div>
+                  <div className="text-base text-[#64748d] mb-4">{period}</div>
+                  <p className="text-base text-[#64748d] mb-6">{plan.description}</p>
+                  <Link
+                    href={plan.name === 'Free' ? '/upload' : '/auth'}
+                    className={`block w-full py-3 text-center rounded text-sm font-normal mb-6 transition ${
+                      plan.ctaStyle === 'primary'
+                        ? 'bg-[#533afd] text-white hover:bg-[#4338ca]'
+                        : plan.ctaStyle === 'ghost-dark'
+                        ? 'border border-[#061b31] text-[#061b31] hover:bg-[#f6f9fc]'
+                        : 'border border-[#b9b9f9] text-[#533afd] hover:bg-[#f6f9fc]'
+                    }`}
+                  >
+                    {plan.cta}
+                  </Link>
+                  <ul className="space-y-3 flex-1">
+                    {plan.features.map((feature) => (
+                      <li key={feature.text} className="flex items-start gap-2 text-sm">
+                        {feature.included ? (
+                          <svg className="w-4 h-4 text-[#15be53] mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4 text-[#64748d] mt-0.5 shrink-0 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        )}
+                        <span className={feature.included ? 'text-[#64748d]' : 'text-[#64748d] opacity-40'}>
+                          {feature.text}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              )}
-
-              {/* Header */}
-              <div className="mb-6">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${
-                  tier.highlighted
-                    ? 'bg-gradient-to-br from-indigo-500 to-cyan-500'
-                    : 'bg-slate-800'
-                }`}>
-                  {tier.icon}
-                </div>
-                <h3 className="text-xl font-semibold mb-1">{tier.name}</h3>
-                <p className="text-sm text-slate-400">{tier.description}</p>
-              </div>
-
-              {/* Price */}
-              <div className="mb-6">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold">
-                    €{isYearly ? Math.round(tier.yearlyPrice / 12) : tier.monthlyPrice}
-                  </span>
-                  <span className="text-slate-400">/mo</span>
-                </div>
-                {isYearly && tier.yearlyPrice > 0 && (
-                  <p className="text-sm text-slate-400 mt-1">
-                    €{tier.yearlyPrice} billed yearly
-                  </p>
-                )}
-              </div>
-
-              {/* Features */}
-              <ul className="space-y-3 mb-8">
-                {tier.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-sm">
-                    <Check className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                    <span className="text-slate-300">{feature}</span>
-                  </li>
-                ))}
-                {tier.notIncluded?.map((feature, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-sm opacity-50">
-                    <X className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-slate-500">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* CTA */}
-              <button
-                className={`w-full py-3 px-4 rounded-xl font-medium transition-all duration-200 ${
-                  tier.highlighted
-                    ? 'bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white shadow-lg shadow-indigo-500/25'
-                    : tier.id === 'free'
-                    ? 'bg-slate-800 hover:bg-slate-700 text-white'
-                    : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700'
-                }`}
-              >
-                {tier.cta}
-              </button>
-            </motion.div>
-          ))}
-        </motion.div>
+              )
+            })}
+          </div>
+        </div>
       </section>
 
-      {/* Comparison Table */}
-      <section className="relative z-10 px-6 pb-20">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Compare Plans</h2>
-          <div className="bg-slate-900/50 rounded-2xl border border-slate-800 overflow-hidden">
-            {/* Table Header */}
-            <div className="grid grid-cols-5 gap-4 p-4 bg-slate-800/50 border-b border-slate-700 text-sm font-medium">
-              <div className="text-left">Feature</div>
-              <div className="text-center">Free</div>
-              <div className="text-center">Starter</div>
-              <div className="text-center text-indigo-400">Pro</div>
-              <div className="text-center">Team</div>
-            </div>
-
-            {/* Table Rows */}
-            {[
-              ['CV Generations', '1/mo', '10/mo', 'Unlimited', 'Unlimited'],
-              ['Resume Uploads', '2', '10', 'Unlimited', 'Unlimited'],
-              ['AI Analysis', 'Basic', 'Full', 'Full + Insights', 'Full + Insights'],
-              ['Cover Letters', '—', '—', '✓', '✓'],
-              ['Interview Prep', '—', '—', '✓', '✓'],
-              ['Analytics', '—', '—', '✓', '✓ + Admin'],
-              ['White-label', '—', '—', '—', '✓'],
-              ['Support', 'Email', 'Priority', 'Priority', 'Dedicated'],
-            ].map((row, idx) => (
-              <div
-                key={idx}
-                className="grid grid-cols-5 gap-4 p-4 border-b border-slate-800/50 text-sm hover:bg-slate-800/30 transition-colors"
-              >
-                <div className="text-slate-300">{row[0]}</div>
-                {row.slice(1).map((cell, cellIdx) => (
-                  <div key={cellIdx} className={`text-center ${cellIdx === 2 ? 'text-indigo-400' : 'text-slate-400'}`}>
-                    {cell === '✓' ? <Check className="w-4 h-4 mx-auto text-emerald-400" /> :
-                     cell === '—' ? <span className="text-slate-600">—</span> : cell}
-                  </div>
+      {/* Feature Comparison */}
+      <section className="py-16 bg-[#f6f9fc]">
+        <div className="max-w-[1080px] mx-auto px-4">
+          <h2 className="text-2xl font-light text-[#061b31] mb-8 text-center">Full Feature Comparison</h2>
+          <div className="bg-white rounded-lg border border-[#e5edf5] overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[#e5edf5]">
+                  <th className="text-left p-4 font-normal text-[#64748d]">Feature</th>
+                  <th className="text-center p-4 font-normal text-[#061b31]">Free</th>
+                  <th className="text-center p-4 font-normal text-[#061b31]">Starter</th>
+                  <th className="text-center p-4 font-normal text-[#061b31]">Pro</th>
+                  <th className="text-center p-4 font-normal text-[#061b31]">Team</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { feature: 'Job Scans', free: '5/mo', starter: '20/mo', pro: 'Unlimited', team: 'Unlimited' },
+                  { feature: 'CV Generations', free: '1/mo', starter: '5/mo', pro: 'Unlimited', team: 'Unlimited' },
+                  { feature: 'Resume Analysis', free: 'Basic', starter: 'Full', pro: 'Advanced AI', team: 'Advanced AI' },
+                  { feature: 'Cover Letters', free: '—', starter: '5/mo', pro: 'Unlimited', team: 'Unlimited' },
+                  { feature: 'Interview Prep', free: '—', starter: '—', pro: 'Included', team: 'Included' },
+                  { feature: 'App Tracker', free: '—', starter: '—', pro: 'Included', team: 'Included' },
+                  { feature: 'Team Members', free: '—', starter: '—', pro: '—', team: 'Up to 5' },
+                  { feature: 'API Access', free: '—', starter: '—', pro: '—', team: 'Included' },
+                  { feature: 'Support', free: 'Email', starter: 'Priority Email', pro: 'Priority Chat', team: 'Dedicated' },
+                ].map((row, i) => (
+                  <tr key={row.feature} className={i % 2 === 0 ? 'bg-white' : 'bg-[#f6f9fc]'}>
+                    <td className="p-4 text-[#64748d]">{row.feature}</td>
+                    <td className="p-4 text-center text-[#64748d]">{row.free}</td>
+                    <td className="p-4 text-center text-[#64748d]">{row.starter}</td>
+                    <td className="p-4 text-center text-[#15be53]">{row.pro}</td>
+                    <td className="p-4 text-center text-[#15be53]">{row.team}</td>
+                  </tr>
                 ))}
-              </div>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="py-16">
+        <div className="max-w-[1080px] mx-auto px-4">
+          <h2 className="text-2xl font-light text-[#061b31] mb-8 text-center">Frequently Asked Questions</h2>
+          <div className="max-w-2xl mx-auto space-y-4">
+            {[
+              { q: 'Can I cancel anytime?', a: 'Yes. You can cancel your subscription at any time from your account settings. Your access continues until the end of your billing period.' },
+              { q: 'What happens when I hit my free limit?', a: 'You will be prompted to upgrade to a paid plan. Your existing data (resumes, evaluations) remains accessible even on the free tier.' },
+              { q: 'Is there a free trial for paid plans?', a: 'We offer a generous free tier so you can try core features before upgrading. There is no separate trial period for paid plans.' },
+              { q: 'Can I change plans later?', a: 'Absolutely. You can upgrade or downgrade at any time. Upgrades take effect immediately; downgrades apply at the next billing cycle.' },
+              { q: 'Do you offer refunds?', a: 'If you are not satisfied, contact us within 14 days of your first paid subscription for a full refund.' },
+            ].map((faq) => (
+              <details key={faq.q} className="group border-b border-[#e5edf5] pb-4">
+                <summary className="flex items-center justify-between cursor-pointer list-none py-2">
+                  <span className="text-base font-normal text-[#061b31]">{faq.q}</span>
+                  <span className="text-[#64748d] group-open:rotate-180 transition">&#9662;</span>
+                </summary>
+                <p className="text-base text-[#64748d] pt-2 leading-relaxed">{faq.a}</p>
+              </details>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="relative z-10 px-6 py-20">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            {[
-              {
-                q: "Can I upgrade or downgrade anytime?",
-                a: "Yes, you can change your plan at any time. When upgrading, you'll get immediate access to new features. When downgrading, changes take effect at the end of your billing period."
-              },
-              {
-                q: "What happens if I exceed my monthly CV limit?",
-                a: "You'll see an upgrade prompt with a preview of the feature. You can purchase additional CV credits or upgrade to a higher tier."
-              },
-              {
-                q: "Is there a free trial for paid plans?",
-                a: "The Free tier lets you try all basic features. For paid plans, we offer a 14-day money-back guarantee, no questions asked."
-              },
-              {
-                q: "Do you offer refunds?",
-                a: "Yes, we offer a 14-day money-back guarantee for all paid plans. Contact support@hunt-x.app for assistance."
-              }
-            ].map((faq, idx) => (
-              <div key={idx} className="bg-slate-900/50 rounded-xl p-6 border border-slate-800">
-                <h3 className="font-semibold mb-2">{faq.q}</h3>
-                <p className="text-slate-400 text-sm">{faq.a}</p>
-              </div>
-            ))}
-          </div>
+      {/* CTA */}
+      <section className="py-16 bg-[#1c1e54]">
+        <div className="max-w-[1080px] mx-auto px-4 text-center">
+          <h2 className="text-2xl font-light text-white mb-2">Still have questions?</h2>
+          <p className="text-base text-white/70 mb-6">
+            Our team is here to help you choose the right plan.
+          </p>
+          <a
+            href="mailto:support@hunt-x.app"
+            className="inline-block px-6 py-3 bg-white text-[#533afd] rounded hover:bg-gray-100 transition"
+          >
+            Contact Support
+          </a>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-slate-800 py-12 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-lg flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-bold">Hunt-X</span>
-          </div>
-          <p className="text-slate-500 text-sm">
-            © 2026 Hunt-X. All rights reserved.
-          </p>
+      <footer className="py-12 border-t border-[#e5edf5]">
+        <div className="max-w-[1080px] mx-auto px-4 text-center text-sm text-[#64748d]">
+          &copy; 2026 Hunt-X. All rights reserved.
         </div>
       </footer>
-    </div>
-  );
+    </main>
+  )
 }

@@ -5,6 +5,7 @@ Portal scanning and job discovery
 
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
 
@@ -13,7 +14,7 @@ from services.job_scraper_service import (
     UserProfile,
     ScrapedJob
 )
-from dependencies import get_job_scraper_service, get_current_user
+from dependencies import get_job_scraper_service, get_current_user, get_db
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 
@@ -140,20 +141,51 @@ async def analyze_job(
 
 @router.get("/saved", response_model=List[ScrapedJobResponse])
 async def get_saved_jobs(
-    user=Depends(get_current_user)
+    user=Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     """Get user's saved/bookmarked jobs"""
-    # Implementation would fetch from DB
-    return []
+    from models import SavedJob
+    saved = db.query(SavedJob).filter(SavedJob.user_id == user.id).all()
+    return [
+        ScrapedJobResponse(
+            id=str(s.job_id),
+            title=s.title or "",
+            company=s.company or "",
+            location=s.location or "",
+            archetype=s.archetype,
+            seniority=s.seniority,
+            required_skills=s.required_skills or [],
+            salary_range=s.salary_range,
+            remote_policy=s.remote_policy,
+            match_score=s.match_score,
+            quality_score=s.quality_score,
+            url=s.url or ""
+        )
+        for s in saved
+    ]
 
 
 @router.post("/{job_id}/save")
 async def save_job(
     job_id: str,
-    user=Depends(get_current_user)
+    user=Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     """Save a job to user's list"""
-    # Implementation would save to DB
+    from models import SavedJob
+    existing = db.query(SavedJob).filter(
+        SavedJob.user_id == user.id,
+        SavedJob.job_id == job_id
+    ).first()
+    if existing:
+        return {"status": "already_saved"}
+    saved = SavedJob(
+        user_id=user.id,
+        job_id=job_id
+    )
+    db.add(saved)
+    db.commit()
     return {"status": "saved"}
 
 

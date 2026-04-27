@@ -2,52 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Build timestamp: 2026-04-23-v2 */
+/* ===== HUNT-X DESIGN TOKENS ===== */
+/* Based on DESIGN_PROMPTS.md spec */
 
-/* ===== DESIGN TOKENS ===== */
 :root {
-  /* Primary Brand Colors */
-  --brand-50: 238 242 255;
-  --brand-100: 224 231 255;
-  --brand-200: 199 210 254;
-  --brand-300: 165 180 252;
-  --brand-400: 129 140 248;
-  --brand-500: 99 102 241;
-  --brand-600: 79 70 229;
-  --brand-700: 67 56 202;
-  --brand-800: 55 48 163;
-  --brand-900: 49 46 129;
+  /* Brand Purple */
+  --purple-50: 245 243 255;
+  --purple-100: 237 233 254;
+  --purple-500: 83 58 253;
+  --purple-600: 67 56 202;
+  --purple-700: 55 48 163;
 
-  /* Accent Cyan */
-  --accent-50: 236 254 255;
-  --accent-100: 207 250 254;
-  --accent-200: 165 243 252;
-  --accent-300: 103 232 249;
-  --accent-400: 34 211 238;
-  --accent-500: 6 182 212;
-  --accent-600: 8 145 178;
+  /* Navy Headings */
+  --navy-900: 6 27 49;
+
+  /* Slate Body */
+  --slate-500: 100 116 141;
 
   /* Semantic Colors */
-  --background: 10 10 15;
-  --foreground: 248 250 252;
-  --card: 17 17 24;
-  --card-foreground: 248 250 252;
-  --popover: 17 17 24;
-  --popover-foreground: 248 250 252;
-  --primary: 99 102 241;
+  --background: 255 255 255;
+  --foreground: 6 27 49;
+  --card: 255 255 255;
+  --card-foreground: 6 27 49;
+  --popover: 255 255 255;
+  --popover-foreground: 6 27 49;
+  --primary: 83 58 253;
   --primary-foreground: 255 255 255;
-  --secondary: 30 30 40;
-  --secondary-foreground: 248 250 252;
-  --muted: 30 30 40;
-  --muted-foreground: 148 163 184;
-  --accent: 30 30 40;
-  --accent-foreground: 99 102 241;
-  --destructive: 239 68 68;
+  --secondary: 246 249 252;
+  --secondary-foreground: 6 27 49;
+  --muted: 246 249 252;
+  --muted-foreground: 100 116 141;
+  --accent: 246 249 252;
+  --accent-foreground: 83 58 253;
+  --destructive: 234 34 97;
   --destructive-foreground: 255 255 255;
-  --border: 30 30 40;
-  --input: 30 30 40;
-  --ring: 99 102 241;
-  --radius: 0.75rem;
+  --border: 229 237 245;
+  --input: 229 237 245;
+  --ring: 83 58 253;
+  --radius: 0.375rem;
 }
 
 @layer base {
@@ -64,12 +56,17 @@
     color: rgb(var(--foreground));
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+    font-family: sohne-var, "SF Pro Display", system-ui, -apple-system, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: rgb(var(--navy-900));
+    font-weight: 300;
   }
 }
 
 @layer utilities {
-  /* Animation Utilities */
   .animate-fade-in {
     animation: fadeIn 0.5s ease-out;
   }
@@ -82,34 +79,20 @@
     animation: scaleIn 0.3s ease-out;
   }
 
-  /* Hover Lift */
   .hover-lift {
-    transition-property: transform;
+    transition-property: transform, box-shadow;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 300ms;
   }
   .hover-lift:hover {
-    --tw-translate-y: -0.25rem;
-    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-  }
-
-  /* Glow Effects */
-  .glow {
-    box-shadow: 0 0 40px -10px rgba(99, 102, 241, 0.3);
-  }
-
-  .glow-strong {
-    box-shadow: 0 0 60px -10px rgba(99, 102, 241, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 15px 35px rgba(23, 23, 23, 0.08);
   }
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUp {

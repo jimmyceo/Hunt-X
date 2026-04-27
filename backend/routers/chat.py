@@ -5,11 +5,12 @@ WebSocket or REST for real-time application assistance
 
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
 
 from services.chat_assist_service import ChatAssistService, ChatMessage
-from dependencies import get_chat_service, get_current_user
+from dependencies import get_chat_service, get_current_user, get_db
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
@@ -42,26 +43,46 @@ class ChatSessionResponse(BaseModel):
 async def start_chat(
     request: StartChatRequest,
     user=Depends(get_current_user),
+    db: Session = Depends(get_db),
     chat_service: ChatAssistService = Depends(get_chat_service)
 ):
     """
     Start a new chat session for job application assistance.
     Requires previous evaluation data.
     """
+    from models import Resume, Evaluation
 
-    # Fetch resume and job details (from DB)
-    # For now, simplified
-    resume_text = "..."  # Fetch from DB
-    job_description = "..."  # Fetch from DB
-    evaluation_data = {...}  # Fetch from DB
+    # Fetch resume
+    resume = db.query(Resume).filter(
+        Resume.id == request.resume_id,
+        Resume.user_id == user.id
+    ).first()
+    if not resume or not resume.raw_text:
+        raise HTTPException(status_code=400, detail="Resume not found or empty")
+
+    # Fetch evaluation by job_id (treating job_id as evaluation_id for now)
+    evaluation = db.query(Evaluation).filter(
+        Evaluation.id == request.job_id,
+        Evaluation.user_id == user.id
+    ).first()
+
+    job_description = evaluation.job_description if evaluation else ""
+    company = evaluation.company if evaluation else ""
+    job_title = evaluation.role if evaluation else ""
+    evaluation_data = {
+        "company": company,
+        "job_title": job_title,
+        "archetype": evaluation.archetype if evaluation else "",
+        "global_score": float(evaluation.global_score) if evaluation and evaluation.global_score else 0,
+    }
 
     context = chat_service.start_chat(
         user_id=user.id,
         job_id=request.job_id,
-        resume_text=resume_text,
+        resume_text=resume.raw_text,
         job_description=job_description,
-        company=evaluation_data.get('company'),
-        job_title=evaluation_data.get('job_title'),
+        company=company,
+        job_title=job_title,
         evaluation_data=evaluation_data
     )
 
@@ -143,19 +164,32 @@ async def quick_answer(
     resume_id: str,
     job_id: str,
     user=Depends(get_current_user),
+    db: Session = Depends(get_db),
     chat_service: ChatAssistService = Depends(get_chat_service)
 ):
     """
     Quick one-off answer without chat context.
     For simple questions.
     """
+    from models import Resume, Evaluation
 
-    # Fetch resume and job
-    resume_text = "..."
-    job_description = "..."
+    # Fetch resume
+    resume = db.query(Resume).filter(
+        Resume.id == resume_id,
+        Resume.user_id == user.id
+    ).first()
+    if not resume or not resume.raw_text:
+        raise HTTPException(status_code=400, detail="Resume not found or empty")
+
+    # Fetch evaluation
+    evaluation = db.query(Evaluation).filter(
+        Evaluation.id == job_id,
+        Evaluation.user_id == user.id
+    ).first()
+    job_description = evaluation.job_description if evaluation else ""
 
     answer = await chat_service.quick_answer(
-        resume_text=resume_text,
+        resume_text=resume.raw_text,
         job_description=job_description,
         question=question
     )

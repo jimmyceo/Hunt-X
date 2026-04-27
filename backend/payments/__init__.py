@@ -24,12 +24,10 @@ class PaymentProviderType(str, Enum):
     BANGLADESH_BKASH = "bangladesh_bkash"  # Future: bKash
     BANGLADESH_SSLCOMMERZ = "bangladesh_sslcommerz"  # Future: SSLCommerz
 
-class SubscriptionTier(str, Enum):
-    """Subscription tiers matching Bible"""
-    TRY = "try"           # Free - 5 jobs one-time
-    ACTIVE = "active"     # €12/month - 40 jobs
-    AGGRESSIVE = "aggressive"  # €29/month - 100 jobs
-    UNLIMITED = "unlimited"    # €49/month - unlimited
+# NOTE: SubscriptionTier is imported from models.enums in payment_v2.py
+# Kept here for backward compatibility with existing StripeProvider code
+# that references payments.SubscriptionTier directly.
+from models.enums import SubscriptionTier
 
 class PaymentProvider(ABC):
     """
@@ -135,20 +133,20 @@ class RegionConfig:
     # Pricing per region (EUR base, can extend for local currency)
     TIER_PRICING = {
         "default": {
-            SubscriptionTier.TRY: {"amount": 0, "currency": "eur"},
-            SubscriptionTier.ACTIVE: {"amount": 1200, "currency": "eur"},      # €12
-            SubscriptionTier.AGGRESSIVE: {"amount": 2900, "currency": "eur"},  # €29
-            SubscriptionTier.UNLIMITED: {"amount": 4900, "currency": "eur"},   # €49
+            SubscriptionTier.FREE: {"amount": 0, "currency": "eur"},
+            SubscriptionTier.STARTER: {"amount": 900, "currency": "eur"},   # €9
+            SubscriptionTier.PRO: {"amount": 2900, "currency": "eur"},      # €29
+            SubscriptionTier.TEAM: {"amount": 4900, "currency": "eur"},       # €49
         },
         # Future: India pricing in INR
         # "IN": {
-        #     SubscriptionTier.TRY: {"amount": 0, "currency": "inr"},
-        #     SubscriptionTier.ACTIVE: {"amount": 99900, "currency": "inr"},      # ₹999
+        #     SubscriptionTier.FREE: {"amount": 0, "currency": "inr"},
+        #     SubscriptionTier.STARTER: {"amount": 79900, "currency": "inr"},
         #     ...
         # },
         # Future: Bangladesh pricing in BDT
         # "BD": {
-        #     SubscriptionTier.ACTIVE: {"amount": 120000, "currency": "bdt"},    # ৳1200
+        #     SubscriptionTier.STARTER: {"amount": 100000, "currency": "bdt"},
         #     ...
         # },
     }

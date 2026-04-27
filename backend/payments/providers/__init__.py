@@ -34,31 +34,29 @@ class StripeProvider(PaymentProvider):
             raise ValueError("Stripe API key not configured")
 
         # Tier to Stripe Price ID mapping
-        # In production, these should be Stripe Price objects
-        # For now, we use dynamic pricing (ad-hoc line items)
         self.TIER_CONFIG = {
-            SubscriptionTier.TRY: {
+            SubscriptionTier.FREE: {
                 "amount": 0,
-                "name": "Hunt-X Try",
-                "description": "5 job evaluations one-time",
-                "mode": "payment"  # One-time
+                "name": "Hunt-X Free",
+                "description": "5 job scans, 1 CV per month",
+                "mode": "payment"
             },
-            SubscriptionTier.ACTIVE: {
-                "amount": 1200,  # €12.00
-                "name": "Hunt-X Active",
-                "description": "40 job evaluations per month",
+            SubscriptionTier.STARTER: {
+                "amount": 900,  # €9.00
+                "name": "Hunt-X Starter",
+                "description": "20 job scans, 5 CVs per month",
                 "mode": "subscription"
             },
-            SubscriptionTier.AGGRESSIVE: {
+            SubscriptionTier.PRO: {
                 "amount": 2900,  # €29.00
-                "name": "Hunt-X Aggressive",
-                "description": "100 job evaluations per month",
+                "name": "Hunt-X Pro",
+                "description": "Unlimited scans, unlimited CVs, interview prep",
                 "mode": "subscription"
             },
-            SubscriptionTier.UNLIMITED: {
+            SubscriptionTier.TEAM: {
                 "amount": 4900,  # €49.00
-                "name": "Hunt-X Unlimited",
-                "description": "Unlimited job evaluations",
+                "name": "Hunt-X Team",
+                "description": "Everything in Pro + team collaboration",
                 "mode": "subscription"
             },
         }
@@ -80,8 +78,8 @@ class StripeProvider(PaymentProvider):
         if not config:
             raise CheckoutCreationError(f"Unknown tier: {tier}")
 
-        # Try tier is free - no payment needed
-        if tier == SubscriptionTier.TRY:
+        # Free tier - no payment needed
+        if tier == SubscriptionTier.FREE:
             return {
                 "checkout_url": success_url,
                 "session_id": "FREE_TRIAL",
@@ -150,8 +148,8 @@ class StripeProvider(PaymentProvider):
         if session_id == "FREE_TRIAL":
             return {
                 "success": True,
-                "user_id": None,  # Must be passed separately for free tier
-                "tier": SubscriptionTier.TRY.value,
+                "user_id": None,
+                "tier": SubscriptionTier.FREE.value,
                 "transaction_id": "FREE",
                 "amount_paid": 0,
                 "currency": "eur",

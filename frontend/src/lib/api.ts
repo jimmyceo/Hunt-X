@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hunt-x-production-2954.up.railway.app';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export const setAuthToken = (token: string | null) => {
   if (typeof window !== 'undefined' && token) localStorage.setItem('token', token);
@@ -10,9 +10,23 @@ export const getAuthToken = (): string | null => {
   return null;
 };
 
+const authHeaders = (): Record<string, string> => {
+  const token = getAuthToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+const jsonHeaders = (): Record<string, string> => {
+  const token = getAuthToken();
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+};
+
 export const apiClient = {
   baseURL: API_BASE_URL,
 
+  // ============ AUTH ============
   async register(email: string, password: string, name?: string) {
     const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
       method: 'POST',
@@ -36,48 +50,39 @@ export const apiClient = {
   },
 
   async getCurrentUser() {
-    const token = getAuthToken();
-    if (!token) throw new Error('Not authenticated');
     const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: authHeaders(),
     });
     return res.json();
   },
 
+  // ============ RESUME ============
   async uploadResume(email: string, file: File) {
-    const token = getAuthToken();
     const formData = new FormData();
     formData.append('file', file);
     formData.append('email', email);
     const res = await fetch(`${API_BASE_URL}/api/resume/upload`, {
       method: 'POST',
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      headers: authHeaders(),
       body: formData,
     });
     return res.json();
   },
 
   async analyzeResume(resumeId: string) {
-    const token = getAuthToken();
     const res = await fetch(`${API_BASE_URL}/api/resume/analyze`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-      },
+      headers: jsonHeaders(),
       body: JSON.stringify({ resume_id: resumeId }),
     });
     return res.json();
   },
 
+  // ============ CV ============
   async generateCV(resumeId: string, jobTitle: string, company: string, jobDescription: string) {
-    const token = getAuthToken();
     const res = await fetch(`${API_BASE_URL}/api/cv/generate`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-      },
+      headers: jsonHeaders(),
       body: JSON.stringify({
         resume_id: resumeId,
         job_title: jobTitle,
@@ -89,9 +94,8 @@ export const apiClient = {
   },
 
   async getUserCVs(userId: string) {
-    const token = getAuthToken();
     const res = await fetch(`${API_BASE_URL}/api/cv/user/${userId}`, {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      headers: authHeaders(),
     });
     return res.json();
   },
@@ -100,10 +104,68 @@ export const apiClient = {
     window.open(`${API_BASE_URL}/api/cv/${cvId}/download`, '_blank');
   },
 
+  // ============ EVALUATION ============
+  async createEvaluation(resumeId: string, jobDescription: string, company: string, jobTitle: string, jobUrl?: string) {
+    const res = await fetch(`${API_BASE_URL}/api/evaluate/`, {
+      method: 'POST',
+      headers: jsonHeaders(),
+      body: JSON.stringify({
+        resume_id: resumeId,
+        job_description: jobDescription,
+        company,
+        job_title: jobTitle,
+        job_url: jobUrl,
+      }),
+    });
+    return res.json();
+  },
+
+  async listEvaluations() {
+    const res = await fetch(`${API_BASE_URL}/api/evaluate/`, {
+      headers: authHeaders(),
+    });
+    return res.json();
+  },
+
+  // ============ SUBSCRIPTIONS (canonical) ============
+  async getPlans() {
+    const res = await fetch(`${API_BASE_URL}/api/subscriptions/plans`);
+    return res.json();
+  },
+
+  async getCurrentSubscription(userId: string) {
+    const res = await fetch(`${API_BASE_URL}/api/subscriptions/current?user_id=${userId}`);
+    return res.json();
+  },
+
+  async createCheckout(tier: string, userId: string, email: string) {
+    const res = await fetch(`${API_BASE_URL}/api/subscriptions/create-checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tier, user_id: userId, email }),
+    });
+    return res.json();
+  },
+
+  async cancelSubscription(userId: string, atPeriodEnd: boolean = true) {
+    const res = await fetch(`${API_BASE_URL}/api/subscriptions/cancel`, {
+      method: 'POST',
+      headers: jsonHeaders(),
+      body: JSON.stringify({ user_id: userId, at_period_end: atPeriodEnd }),
+    });
+    return res.json();
+  },
+
+  async getUsageSummary(userId: string) {
+    const res = await fetch(`${API_BASE_URL}/api/subscriptions/usage?user_id=${userId}`);
+    return res.json();
+  },
+
+  // ============ LEGACY COMPATIBILITY ============
   async checkPaymentStatus(email: string) {
-    const token = getAuthToken();
-    const res = await fetch(`${API_BASE_URL}/api/payment/status/${email}`, {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+    // Fallback to v2 legacy endpoint for backward compatibility
+    const res = await fetch(`${API_BASE_URL}/api/payment/v2/status/${email}`, {
+      headers: authHeaders(),
     });
     return res.json();
   },

@@ -19,8 +19,9 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models import User
 from dependencies import get_current_user
-from payments import PaymentRouter, SubscriptionTier, PaymentError
+from payments import PaymentRouter, PaymentError
 from payments.providers import StripeProvider
+from models.enums import SubscriptionTier
 
 def create_stripe_provider(db):
     """Create Stripe provider with config from environment"""

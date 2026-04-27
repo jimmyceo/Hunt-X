@@ -76,8 +76,8 @@ async def upload_resume(
         from dependencies import get_password_hash
         user = User(
             email=email,
-            password_hash=get_password_hash(str(uuid.uuid4())),  # Random password
-            tier="try",
+            password_hash=get_password_hash(str(uuid.uuid4())),
+            tier="free",
             jobs_remaining=5
         )
         db.add(user)
