@@ -23,8 +23,8 @@ jobs:
       - name: Deploy to Vercel
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_ORG_ID: team_I9ThVHc78g3OrsAjGnVFA4XX
+          VERCEL_PROJECT_ID: prj_3gLgFsA2BqoUbMFbQpdnbMxeMpag
         run: |
           cd frontend
-          vercel --token "$VERCEL_TOKEN" --project hunt-x-app --prod --yes
+          vercel --token "$VERCEL_TOKEN" --prod --yes
