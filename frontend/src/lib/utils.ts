@@ -8,3 +8,4 @@ export function cn(...inputs: ClassValue[]) {
 // Trigger deploy
 /* deployed */
 /* github pages deploy */
+/* public repo deploy */
