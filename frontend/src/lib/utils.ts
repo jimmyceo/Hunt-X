@@ -7,3 +7,4 @@ export function cn(...inputs: ClassValue[]) {
 /* Deploy trigger */
 // Trigger deploy
 /* deployed */
+/* github pages deploy */
