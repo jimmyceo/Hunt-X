@@ -3,6 +3,7 @@
 import { ReactNode, useState } from 'react';
 import { X, Sparkles, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useSubscription } from '@/lib/subscription-context';
 
 interface PaywallModalProps {
   isOpen: boolean;
@@ -67,10 +68,12 @@ export function PaywallModal({
             </ul>
           </div>
 
-          <button className="w-full py-3 px-4 bg-[#533afd] hover:bg-[#4338ca] text-white font-normal rounded-lg transition-all duration-200 flex items-center justify-center gap-2 group">
+          <a
+            href="/pricing"
+            className="block w-full py-3 px-4 bg-[#533afd] hover:bg-[#4338ca] text-white font-normal rounded-lg transition-all duration-200 text-center"
+          >
             Upgrade Now
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </button>
+          </a>
 
           <p className="text-center text-xs text-[#64748d] mt-4">
             14-day money-back guarantee. Cancel anytime.
@@ -90,10 +93,23 @@ interface FeatureGateProps {
 
 export function FeatureGate({ children, feature, fallback, tier = 'pro' }: FeatureGateProps) {
   const [showPaywall, setShowPaywall] = useState(false);
-  const hasAccess = false;
+  const { usage, isLoading } = useSubscription();
+
+  // Check if user has access based on usage data
+  const featureData = usage?.features?.find((f) => f.feature === feature);
+  const hasAccess = featureData ? (featureData.unlimited || featureData.remaining > 0) : false;
+  const currentTier = usage?.tier || 'free';
+
+  if (isLoading) {
+    return <div className="animate-pulse bg-[#f6f9fc] rounded-xl h-32"></div>;
+  }
 
   if (hasAccess) {
     return <>{children}</>;
+  }
+
+  if (fallback) {
+    return <>{fallback}</>;
   }
 
   return (
@@ -115,7 +131,7 @@ export function FeatureGate({ children, feature, fallback, tier = 'pro' }: Featu
         isOpen={showPaywall}
         onClose={() => setShowPaywall(false)}
         feature={feature}
-        currentTier="free"
+        currentTier={currentTier}
         requiredTier={tier}
       />
     </>

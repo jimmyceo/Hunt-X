@@ -1,4 +1,5 @@
 import './globals.css'
+import { SubscriptionProvider } from '@/lib/subscription-context'
 
 export const metadata = {
   title: 'Hunt-X - AI-Powered Job Search',
@@ -13,7 +14,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-white text-[#061b31] antialiased" style={{ fontFamily: 'sohne-var, SF Pro Display, system-ui, -apple-system, sans-serif' }}>
-        {children}
+        <SubscriptionProvider>
+          {children}
+        </SubscriptionProvider>
       </body>
     </html>
   )

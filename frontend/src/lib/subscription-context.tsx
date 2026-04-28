@@ -1,8 +1,9 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { apiClient } from './api';
 
-interface FeatureAccess {
+export interface FeatureAccess {
   has_access: boolean;
   tier: string;
   remaining: number;
@@ -10,7 +11,7 @@ interface FeatureAccess {
   unlimited: boolean;
 }
 
-interface Subscription {
+export interface Subscription {
   id: string;
   user_id: string;
   status: string;
@@ -24,43 +25,112 @@ interface Subscription {
   current_period_end: string | null;
 }
 
+export interface UsageSummary {
+  tier: string;
+  plan_name: string;
+  features: {
+    feature: string;
+    display_name: string;
+    used: number;
+    total: number;
+    remaining: number;
+    unlimited: boolean;
+    reset_date: string | null;
+  }[];
+}
+
 interface SubscriptionContextType {
   subscription: Subscription | null;
-  features: Record<string, FeatureAccess>;
+  usage: UsageSummary | null;
   isLoading: boolean;
-  checkFeature: (feature: string) => FeatureAccess;
-  refreshSubscription: () => Promise<void>;
+  checkFeature: (feature: string) => Promise<FeatureAccess>;
+  consumeFeature: (feature: string, amount?: number) => Promise<{ success: boolean; remaining: number; unlimited: boolean }>;
+  refreshUsage: () => Promise<void>;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [features, setFeatures] = useState<Record<string, FeatureAccess>>({});
+  const [usage, setUsage] = useState<UsageSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const checkFeature = (feature: string): FeatureAccess => {
-    return features[feature] || {
-      has_access: false,
-      tier: 'free',
-      remaining: 0,
-      total: 0,
-      unlimited: false
-    };
+  const refreshUsage = async () => {
+    try {
+      const user = await apiClient.getCurrentUser();
+      if (user?.id) {
+        const usageData = await apiClient.getUsageSummary(user.id);
+        if (usageData.status === 'success' && usageData.usage) {
+          setUsage(usageData.usage);
+        }
+        const subData = await apiClient.getCurrentSubscription(user.id);
+        if (subData.status === 'success' && subData.subscription) {
+          setSubscription(subData.subscription);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load subscription:', e);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const refreshSubscription = async () => {
-    // API call would go here
-    setIsLoading(false);
+  const checkFeature = async (feature: string): Promise<FeatureAccess> => {
+    try {
+      const user = await apiClient.getCurrentUser();
+      if (!user?.id) {
+        return { has_access: false, tier: 'free', remaining: 0, total: 0, unlimited: false };
+      }
+      const data = await apiClient.checkFeature(user.id, feature);
+      if (data.status === 'success' && data.access) {
+        return {
+          has_access: data.access.has_access ?? false,
+          tier: data.access.tier || 'free',
+          remaining: data.access.remaining ?? 0,
+          total: data.access.total ?? 0,
+          unlimited: data.access.unlimited ?? false,
+        };
+      }
+    } catch (e) {
+      console.error('Feature check failed:', e);
+    }
+    return { has_access: false, tier: 'free', remaining: 0, total: 0, unlimited: false };
   };
+
+  const consumeFeature = async (feature: string, amount: number = 1) => {
+    try {
+      const user = await apiClient.getCurrentUser();
+      if (!user?.id) {
+        return { success: false, remaining: 0, unlimited: false };
+      }
+      const data = await apiClient.consumeFeature(user.id, feature, amount);
+      if (data.status === 'success' && data.result) {
+        // Refresh usage after consuming
+        await refreshUsage();
+        return {
+          success: data.result.success ?? false,
+          remaining: data.result.remaining ?? 0,
+          unlimited: data.result.unlimited ?? false,
+        };
+      }
+    } catch (e) {
+      console.error('Feature consume failed:', e);
+    }
+    return { success: false, remaining: 0, unlimited: false };
+  };
+
+  useEffect(() => {
+    refreshUsage();
+  }, []);
 
   return (
     <SubscriptionContext.Provider value={{
       subscription,
-      features,
+      usage,
       isLoading,
       checkFeature,
-      refreshSubscription
+      consumeFeature,
+      refreshUsage,
     }}>
       {children}
     </SubscriptionContext.Provider>

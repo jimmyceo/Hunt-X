@@ -13,13 +13,34 @@ function extractError(data: any): string {
     return data.detail.map((e: any) => e.msg || String(e)).join('; ');
   }
   if (data.message) return data.message;
+  if (data.status === 'error' && data.code) return `${data.message || 'Request failed'} (HTTP ${data.code})`;
   return JSON.stringify(data);
+}
+
+async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 15000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    return res;
+  } catch (err: any) {
+    if (err.name === 'AbortError') {
+      throw new Error('Request timed out. The server may be down.');
+    }
+    throw new Error('Network error. Please check your connection.');
+  } finally {
+    clearTimeout(id);
+  }
 }
 
 async function handleResponse(res: Response) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(extractError(data) || `HTTP ${res.status}`);
+    const msg = extractError(data);
+    if (res.status === 404 && msg.includes('Application not found')) {
+      throw new Error('Backend server is unavailable. Please try again later.');
+    }
+    throw new Error(msg || `HTTP ${res.status}`);
   }
   return data;
 }
@@ -52,7 +73,7 @@ export const apiClient = {
 
   // ============ AUTH ============
   async register(email: string, password: string, name?: string) {
-    const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, name }),
@@ -63,7 +84,7 @@ export const apiClient = {
   },
 
   async login(email: string, password: string) {
-    const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -74,63 +95,42 @@ export const apiClient = {
   },
 
   async getCurrentUser() {
-    const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/auth/me`, {
       headers: authHeaders(),
     });
     return handleResponse(res);
   },
 
   // ============ RESUME ============
-  async uploadResume(email: string, file: File) {
+  async uploadResume(file: File, email: string) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('email', email);
-    const res = await fetch(`${API_BASE_URL}/api/resume/upload`, {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/resume/upload`, {
       method: 'POST',
       headers: authHeaders(),
       body: formData,
     });
-    return res.json();
+    return handleResponse(res);
   },
 
-  async analyzeResume(resumeId: string) {
-    const res = await fetch(`${API_BASE_URL}/api/resume/analyze`, {
-      method: 'POST',
-      headers: jsonHeaders(),
-      body: JSON.stringify({ resume_id: resumeId }),
-    });
-    return res.json();
-  },
-
-  // ============ CV ============
-  async generateCV(resumeId: string, jobTitle: string, company: string, jobDescription: string) {
-    const res = await fetch(`${API_BASE_URL}/api/cv/generate`, {
-      method: 'POST',
-      headers: jsonHeaders(),
-      body: JSON.stringify({
-        resume_id: resumeId,
-        job_title: jobTitle,
-        company: company,
-        job_description: jobDescription,
-      }),
-    });
-    return res.json();
-  },
-
-  async getUserCVs(userId: string) {
-    const res = await fetch(`${API_BASE_URL}/api/cv/user/${userId}`, {
+  async listResumes() {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/resume/`, {
       headers: authHeaders(),
     });
-    return res.json();
+    return handleResponse(res);
   },
 
-  async downloadCV(cvId: string) {
-    window.open(`${API_BASE_URL}/api/cv/${cvId}/download`, '_blank');
+  async getResume(resumeId: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/resume/${resumeId}`, {
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
   },
 
   // ============ EVALUATION ============
   async createEvaluation(resumeId: string, jobDescription: string, company: string, jobTitle: string, jobUrl?: string) {
-    const res = await fetch(`${API_BASE_URL}/api/evaluate/`, {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/evaluate/`, {
       method: 'POST',
       headers: jsonHeaders(),
       body: JSON.stringify({
@@ -141,56 +141,111 @@ export const apiClient = {
         job_url: jobUrl,
       }),
     });
-    return res.json();
+    return handleResponse(res);
+  },
+
+  async getEvaluation(evaluationId: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/evaluate/${evaluationId}`, {
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
   },
 
   async listEvaluations() {
-    const res = await fetch(`${API_BASE_URL}/api/evaluate/`, {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/evaluate/`, {
       headers: authHeaders(),
     });
-    return res.json();
+    return handleResponse(res);
+  },
+
+  // ============ CV ============
+  async generateCV(evaluationId: string, template?: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/cv/generate`, {
+      method: 'POST',
+      headers: jsonHeaders(),
+      body: JSON.stringify({
+        evaluation_id: evaluationId,
+        template,
+      }),
+    });
+    return handleResponse(res);
+  },
+
+  async getCV(cvId: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/cv/${cvId}`, {
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  async listCVs() {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/cv/`, {
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  async downloadCV(cvId: string) {
+    window.open(`${API_BASE_URL}/api/cv/${cvId}/download`, '_blank');
   },
 
   // ============ SUBSCRIPTIONS (canonical) ============
   async getPlans() {
-    const res = await fetch(`${API_BASE_URL}/api/subscriptions/plans`);
-    return res.json();
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/subscriptions/plans`);
+    return handleResponse(res);
   },
 
   async getCurrentSubscription(userId: string) {
-    const res = await fetch(`${API_BASE_URL}/api/subscriptions/current?user_id=${userId}`);
-    return res.json();
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/subscriptions/current?user_id=${userId}`);
+    return handleResponse(res);
+  },
+
+  async getUsageSummary(userId: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/subscriptions/usage?user_id=${userId}`);
+    return handleResponse(res);
+  },
+
+  async checkFeature(userId: string, feature: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/subscriptions/check-feature`, {
+      method: 'POST',
+      headers: jsonHeaders(),
+      body: JSON.stringify({ user_id: userId, feature }),
+    });
+    return handleResponse(res);
+  },
+
+  async consumeFeature(userId: string, feature: string, amount: number = 1) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/subscriptions/consume-feature`, {
+      method: 'POST',
+      headers: jsonHeaders(),
+      body: JSON.stringify({ user_id: userId, feature, amount }),
+    });
+    return handleResponse(res);
   },
 
   async createCheckout(tier: string, userId: string, email: string) {
-    const res = await fetch(`${API_BASE_URL}/api/subscriptions/create-checkout`, {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/subscriptions/create-checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tier, user_id: userId, email }),
     });
-    return res.json();
+    return handleResponse(res);
   },
 
   async cancelSubscription(userId: string, atPeriodEnd: boolean = true) {
-    const res = await fetch(`${API_BASE_URL}/api/subscriptions/cancel`, {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/subscriptions/cancel`, {
       method: 'POST',
       headers: jsonHeaders(),
       body: JSON.stringify({ user_id: userId, at_period_end: atPeriodEnd }),
     });
-    return res.json();
-  },
-
-  async getUsageSummary(userId: string) {
-    const res = await fetch(`${API_BASE_URL}/api/subscriptions/usage?user_id=${userId}`);
-    return res.json();
+    return handleResponse(res);
   },
 
   // ============ LEGACY COMPATIBILITY ============
   async checkPaymentStatus(email: string) {
-    // Fallback to v2 legacy endpoint for backward compatibility
-    const res = await fetch(`${API_BASE_URL}/api/payment/v2/status/${email}`, {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/payment/v2/status/${email}`, {
       headers: authHeaders(),
     });
-    return res.json();
+    return handleResponse(res);
   },
 };

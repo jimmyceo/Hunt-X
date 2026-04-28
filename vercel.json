@@ -1,0 +1,10 @@
+{
+  "rewrites": [
+    { "source": "/auth", "destination": "/auth.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/generate", "destination": "/generate.html" },
+    { "source": "/pricing", "destination": "/pricing.html" },
+    { "source": "/upload", "destination": "/upload.html" },
+    { "source": "/((?!_next|.*\\..*).*)", "destination": "/$1.html" }
+  ]
+}

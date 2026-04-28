@@ -50,14 +50,14 @@ class ResumeDetailResponse(BaseModel):
 
 @router.post("/upload", response_model=ResumeResponse)
 async def upload_resume(
-    email: EmailStr = Form(...),
     file: UploadFile = File(...),
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
     pdf_service: ResumePDFService = Depends(get_resume_pdf_service)
 ):
     """
     Upload resume and parse with AI.
-    Creates user if doesn't exist.
+    Requires authenticated user.
     """
 
     # Validate file type
@@ -69,20 +69,6 @@ async def upload_resume(
             status_code=400,
             detail=f"Invalid file type. Allowed: {', '.join(allowed_extensions)}"
         )
-
-    # Create or get user
-    user = db.query(User).filter(User.email == email).first()
-    if not user:
-        from dependencies import get_password_hash
-        user = User(
-            email=email,
-            password_hash=get_password_hash(str(uuid.uuid4())),
-            tier="free",
-            jobs_remaining=5
-        )
-        db.add(user)
-        db.commit()
-        db.refresh(user)
 
     # Save file
     file_id = str(uuid.uuid4())
@@ -126,7 +112,7 @@ async def upload_resume(
         pdf_result = await pdf_service.generate_resume_pdf(
             resume_text=resume_text,
             user_info={
-                "name": user.name or email.split("@")[0],
+                "name": user.name or user.email.split("@")[0],
                 "email": user.email,
                 "phone": user.phone or "",
                 "location": user.location or "",
