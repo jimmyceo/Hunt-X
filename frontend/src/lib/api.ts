@@ -241,6 +241,15 @@ export const apiClient = {
     return handleResponse(res);
   },
 
+  async updateProfile(name: string, phone?: string, location?: string, linkedin_url?: string, github_url?: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/auth/me`, {
+      method: 'PUT',
+      headers: jsonHeaders(),
+      body: JSON.stringify({ name, phone, location, linkedin_url, github_url }),
+    });
+    return handleResponse(res);
+  },
+
   // ============ PASSWORD RESET ============
   async forgotPassword(email: string) {
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/auth/forgot-password`, {
