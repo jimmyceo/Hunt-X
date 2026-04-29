@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { apiClient } from '@/lib/api'
 import Sidebar from '@/components/layout/Sidebar'
-import { ArrowRight, ArrowLeft, Download, RotateCcw } from 'lucide-react'
+import { ArrowRight, ArrowLeft, Download, RotateCcw, Sparkles, Check, AlertTriangle } from 'lucide-react'
 
 interface Resume {
   id: string
@@ -123,19 +123,21 @@ export default function GeneratePage() {
   const canProceedStep1 = selectedResumeId && jobTitle.trim() && company.trim()
   const canProceedStep2 = jobDescription.trim().length > 50
 
+  const matchScore = evaluation ? Math.round(evaluation.global_score * 20) : 0
+
   return (
-    <div className="min-h-screen bg-[#f6f9fc]">
+    <div className="min-h-screen bg-[#0B0B0F]">
       <Sidebar />
       <main className="lg:ml-[260px] min-h-screen">
         <div className="max-w-3xl mx-auto px-6 py-6">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-2xl font-light text-[#061b31]">Generate Tailored CV</h1>
-              <p className="text-[#64748d] text-sm mt-1">Step {step} of 4</p>
+              <h1 className="text-2xl font-medium text-[#E8E8ED]">Generate Tailored CV</h1>
+              <p className="text-[#8A8F98] text-sm mt-1">Step {step} of 4</p>
             </div>
             <Link
               href="/dashboard"
-              className="text-[#533afd] hover:text-[#4128c9] text-sm transition flex items-center gap-1"
+              className="text-[#60A5FA] hover:text-[#3B82F6] text-sm transition-colors duration-150 flex items-center gap-1"
             >
               Back to Dashboard <ArrowRight className="w-3.5 h-3.5" />
             </Link>
@@ -146,32 +148,36 @@ export default function GeneratePage() {
             {[1, 2, 3, 4].map((s) => (
               <div
                 key={s}
-                className={`flex-1 h-1.5 rounded-full transition ${
-                  s <= step ? 'bg-[#533afd]' : 'bg-[#e5edf5]'
+                className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${
+                  s <= step ? 'bg-[#3B82F6]' : 'bg-white/[0.06]'
                 }`}
               />
             ))}
           </div>
 
           {error && (
-            <div className="mb-6 p-4 rounded-lg bg-[#ea2261]/10 border border-[#ea2261]/20 text-[#ea2261] text-sm">
+            <div className="mb-6 p-4 rounded-md bg-[#EF4444]/10 border border-[#EF4444]/20 text-[#EF4444] text-sm flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
               {error}
             </div>
           )}
 
           {/* Step 1: Select Resume + Job Details */}
           {step === 1 && (
-            <div className="bg-white rounded-xl border border-[#e5edf5] p-6 space-y-6">
+            <div className="bg-[#1A1A24] rounded-lg border border-white/[0.06] p-6 space-y-6">
               <div>
-                <label className="block text-sm font-medium text-[#061b31] mb-1">Select Resume</label>
+                <label className="block text-sm font-medium text-[#8A8F98] mb-1.5">Select Resume</label>
                 {loadingResumes ? (
-                  <p className="text-[#64748d] text-sm">Loading resumes...</p>
+                  <div className="flex items-center gap-2 text-[#8A8F98] text-sm">
+                    <div className="w-4 h-4 border-2 border-[#3B82F6]/30 border-t-[#3B82F6] rounded-full animate-spin" />
+                    Loading resumes...
+                  </div>
                 ) : resumes.length === 0 ? (
-                  <div className="p-4 bg-[#f6f9fc] rounded-lg border border-[#e5edf5]">
-                    <p className="text-[#64748d] text-sm mb-2">No resumes found. Upload one first.</p>
+                  <div className="p-4 bg-[#12121A] rounded-md border border-white/[0.06]">
+                    <p className="text-[#8A8F98] text-sm mb-3">No resumes found. Upload one first.</p>
                     <Link
                       href="/upload"
-                      className="inline-block px-4 py-2 bg-[#533afd] text-white rounded-lg text-sm transition"
+                      className="inline-block px-4 py-2 bg-[#3B82F6] hover:bg-[#60A5FA] text-white rounded-md text-sm font-medium transition-all duration-150"
                     >
                       Upload Resume
                     </Link>
@@ -180,11 +186,11 @@ export default function GeneratePage() {
                   <select
                     value={selectedResumeId}
                     onChange={(e) => setSelectedResumeId(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg bg-white border border-[#e5edf5] text-[#061b31] focus:outline-none focus:border-[#533afd] focus:ring-1 focus:ring-[#533afd]/20 transition"
+                    className="w-full px-4 py-3 rounded-md bg-white/[0.02] border border-white/[0.08] text-[#E8E8ED] focus:outline-none focus:border-[#3B82F6] focus:shadow-[0_0_0_3px_rgba(59,130,246,0.2)] transition-colors duration-150"
                   >
-                    <option value="">Choose a resume...</option>
+                    <option value="" className="bg-[#1A1A24]">Choose a resume...</option>
                     {resumes.map((r) => (
-                      <option key={r.id} value={r.id}>
+                      <option key={r.id} value={r.id} className="bg-[#1A1A24]">
                         {r.original_filename} {r.seniority_level ? `(${r.seniority_level})` : ''}
                       </option>
                     ))}
@@ -193,31 +199,31 @@ export default function GeneratePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#061b31] mb-1">Job Title</label>
+                <label className="block text-sm font-medium text-[#8A8F98] mb-1.5">Job Title</label>
                 <input
                   type="text"
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
                   placeholder="e.g. Senior Frontend Developer"
-                  className="w-full px-4 py-3 rounded-lg bg-white border border-[#e5edf5] text-[#061b31] placeholder:text-[#64748d]/50 focus:outline-none focus:border-[#533afd] focus:ring-1 focus:ring-[#533afd]/20 transition"
+                  className="w-full px-4 py-3 rounded-md bg-white/[0.02] border border-white/[0.08] text-[#E8E8ED] placeholder:text-[#5A5E66] focus:outline-none focus:border-[#3B82F6] focus:shadow-[0_0_0_3px_rgba(59,130,246,0.2)] transition-colors duration-150"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#061b31] mb-1">Company</label>
+                <label className="block text-sm font-medium text-[#8A8F98] mb-1.5">Company</label>
                 <input
                   type="text"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
                   placeholder="e.g. Google"
-                  className="w-full px-4 py-3 rounded-lg bg-white border border-[#e5edf5] text-[#061b31] placeholder:text-[#64748d]/50 focus:outline-none focus:border-[#533afd] focus:ring-1 focus:ring-[#533afd]/20 transition"
+                  className="w-full px-4 py-3 rounded-md bg-white/[0.02] border border-white/[0.08] text-[#E8E8ED] placeholder:text-[#5A5E66] focus:outline-none focus:border-[#3B82F6] focus:shadow-[0_0_0_3px_rgba(59,130,246,0.2)] transition-colors duration-150"
                 />
               </div>
 
               <button
                 onClick={() => setStep(2)}
                 disabled={!canProceedStep1}
-                className="w-full py-3 px-4 bg-[#533afd] hover:bg-[#4128c9] disabled:opacity-50 text-white rounded-lg font-medium transition"
+                className="w-full py-3 px-4 bg-[#3B82F6] hover:bg-[#60A5FA] disabled:opacity-50 disabled:hover:bg-[#3B82F6] text-white rounded-md font-medium transition-all duration-150 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] active:scale-[0.98]"
               >
                 Continue
               </button>
@@ -226,43 +232,53 @@ export default function GeneratePage() {
 
           {/* Step 2: Job Description */}
           {step === 2 && (
-            <div className="bg-white rounded-xl border border-[#e5edf5] p-6 space-y-6">
+            <div className="bg-[#1A1A24] rounded-lg border border-white/[0.06] p-6 space-y-6">
               <div>
-                <label className="block text-sm font-medium text-[#061b31] mb-1">Job Description</label>
+                <label className="block text-sm font-medium text-[#8A8F98] mb-1.5">Job Description</label>
                 <textarea
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
                   placeholder="Paste the full job description here..."
                   rows={10}
-                  className="w-full px-4 py-3 rounded-lg bg-white border border-[#e5edf5] text-[#061b31] placeholder:text-[#64748d]/50 focus:outline-none focus:border-[#533afd] focus:ring-1 focus:ring-[#533afd]/20 transition resize-y"
+                  className="w-full px-4 py-3 rounded-md bg-white/[0.02] border border-white/[0.08] text-[#E8E8ED] placeholder:text-[#5A5E66] focus:outline-none focus:border-[#3B82F6] focus:shadow-[0_0_0_3px_rgba(59,130,246,0.2)] transition-colors duration-150 resize-y"
                 />
-                <p className="text-xs text-[#64748d] mt-1">Minimum 50 characters</p>
+                <p className="text-xs text-[#5A5E66] mt-1">Minimum 50 characters</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#061b31] mb-1">Job URL (optional)</label>
+                <label className="block text-sm font-medium text-[#8A8F98] mb-1.5">Job URL (optional)</label>
                 <input
                   type="url"
                   value={jobUrl}
                   onChange={(e) => setJobUrl(e.target.value)}
                   placeholder="https://..."
-                  className="w-full px-4 py-3 rounded-lg bg-white border border-[#e5edf5] text-[#061b31] placeholder:text-[#64748d]/50 focus:outline-none focus:border-[#533afd] focus:ring-1 focus:ring-[#533afd]/20 transition"
+                  className="w-full px-4 py-3 rounded-md bg-white/[0.02] border border-white/[0.08] text-[#E8E8ED] placeholder:text-[#5A5E66] focus:outline-none focus:border-[#3B82F6] focus:shadow-[0_0_0_3px_rgba(59,130,246,0.2)] transition-colors duration-150"
                 />
               </div>
 
               <div className="flex gap-4">
                 <button
                   onClick={() => setStep(1)}
-                  className="flex-1 py-3 px-4 border border-[#e5edf5] hover:border-[#533afd] rounded-lg font-medium transition flex items-center justify-center gap-1"
+                  className="flex-1 py-3 px-4 border border-white/[0.10] hover:border-white/[0.14] hover:bg-white/[0.04] text-[#E8E8ED] rounded-md font-medium transition-all duration-150 flex items-center justify-center gap-1"
                 >
                   <ArrowLeft className="w-4 h-4" /> Back
                 </button>
                 <button
                   onClick={handleEvaluate}
                   disabled={!canProceedStep2 || evaluating}
-                  className="flex-1 py-3 px-4 bg-[#533afd] hover:bg-[#4128c9] disabled:opacity-50 text-white rounded-lg font-medium transition"
+                  className="flex-1 py-3 px-4 bg-[#3B82F6] hover:bg-[#60A5FA] disabled:opacity-50 disabled:hover:bg-[#3B82F6] text-white rounded-md font-medium transition-all duration-150 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] flex items-center justify-center gap-2 active:scale-[0.98]"
                 >
-                  {evaluating ? 'Evaluating Fit...' : 'Evaluate Fit'}
+                  {evaluating ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Evaluating Fit...
+                    </>
+                  ) : (
+                    <>
+                      Evaluate Fit
+                      <Sparkles className="w-4 h-4" />
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -271,47 +287,47 @@ export default function GeneratePage() {
           {/* Step 3: Evaluation Results */}
           {step === 3 && evaluation && (
             <div className="space-y-6">
-              <div className="bg-white rounded-xl border border-[#e5edf5] p-6">
+              <div className="bg-[#1A1A24] rounded-lg border border-white/[0.06] p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-light">Fit Analysis</h2>
+                  <h2 className="text-xl font-medium text-[#E8E8ED]">Fit Analysis</h2>
                   <div className="text-right">
-                    <div className="text-3xl font-light text-[#15be53]">{Math.round(evaluation.global_score * 20)}%</div>
-                    <div className="text-sm text-[#64748d]">Match Score</div>
+                    <div className="text-3xl font-medium text-[#00D26A]">{matchScore}%</div>
+                    <div className="text-sm text-[#8A8F98]">Match Score</div>
                   </div>
                 </div>
 
-                <div className="p-4 bg-[#f6f9fc] rounded-lg mb-4">
-                  <p className="text-[#061b31] font-medium mb-1">Recommendation</p>
-                  <p className="text-[#64748d] text-sm">{evaluation.recommendation}</p>
+                <div className="p-4 bg-[#12121A] rounded-md border border-white/[0.06] mb-4">
+                  <p className="text-[#E8E8ED] font-medium mb-1">Recommendation</p>
+                  <p className="text-[#8A8F98] text-sm">{evaluation.recommendation}</p>
                 </div>
 
                 {evaluation.block_a && (
                   <div className="grid grid-cols-3 gap-4 mb-4">
-                    <div className="p-3 bg-white rounded-lg border border-[#e5edf5]">
-                      <p className="text-xs text-[#64748d]">Archetype</p>
-                      <p className="text-sm font-medium text-[#061b31]">{evaluation.block_a.archetype || 'N/A'}</p>
+                    <div className="p-3 bg-[#12121A] rounded-md border border-white/[0.06]">
+                      <p className="text-xs text-[#5A5E66] mb-1">Archetype</p>
+                      <p className="text-sm font-medium text-[#E8E8ED]">{evaluation.block_a.archetype || 'N/A'}</p>
                     </div>
-                    <div className="p-3 bg-white rounded-lg border border-[#e5edf5]">
-                      <p className="text-xs text-[#64748d]">Domain</p>
-                      <p className="text-sm font-medium text-[#061b31]">{evaluation.block_a.domain || 'N/A'}</p>
+                    <div className="p-3 bg-[#12121A] rounded-md border border-white/[0.06]">
+                      <p className="text-xs text-[#5A5E66] mb-1">Domain</p>
+                      <p className="text-sm font-medium text-[#E8E8ED]">{evaluation.block_a.domain || 'N/A'}</p>
                     </div>
-                    <div className="p-3 bg-white rounded-lg border border-[#e5edf5]">
-                      <p className="text-xs text-[#64748d]">Seniority</p>
-                      <p className="text-sm font-medium text-[#061b31]">{evaluation.block_a.seniority || 'N/A'}</p>
+                    <div className="p-3 bg-[#12121A] rounded-md border border-white/[0.06]">
+                      <p className="text-xs text-[#5A5E66] mb-1">Seniority</p>
+                      <p className="text-sm font-medium text-[#E8E8ED]">{evaluation.block_a.seniority || 'N/A'}</p>
                     </div>
                   </div>
                 )}
 
                 {evaluation.block_b?.matches?.length > 0 && (
                   <div className="mb-4">
-                    <h3 className="text-sm font-medium text-[#061b31] mb-2">Strong Matches</h3>
+                    <h3 className="text-sm font-medium text-[#E8E8ED] mb-2">Strong Matches</h3>
                     <div className="space-y-2">
                       {evaluation.block_b.matches.slice(0, 5).map((m, i) => (
-                        <div key={i} className="flex items-start gap-2 p-2 bg-[#15be53]/5 rounded-lg">
-                          <span className="text-[#15be53] mt-0.5">✓</span>
+                        <div key={i} className="flex items-start gap-2 p-2 bg-[#00D26A]/[0.06] rounded-md border border-[#00D26A]/[0.15]">
+                          <Check className="w-4 h-4 text-[#00D26A] mt-0.5 shrink-0" />
                           <div>
-                            <p className="text-sm text-[#061b31]">{m.requirement}</p>
-                            <p className="text-xs text-[#64748d]">{m.cv_evidence}</p>
+                            <p className="text-sm text-[#E8E8ED]">{m.requirement}</p>
+                            <p className="text-xs text-[#8A8F98]">{m.cv_evidence}</p>
                           </div>
                         </div>
                       ))}
@@ -321,13 +337,14 @@ export default function GeneratePage() {
 
                 {evaluation.block_b?.gaps?.length > 0 && (
                   <div className="mb-4">
-                    <h3 className="text-sm font-medium text-[#061b31] mb-2">Improvement Areas</h3>
+                    <h3 className="text-sm font-medium text-[#E8E8ED] mb-2">Improvement Areas</h3>
                     <div className="space-y-2">
                       {evaluation.block_b.gaps.slice(0, 5).map((g, i) => (
-                        <div key={i} className="flex items-start gap-2 p-2 bg-amber-500/5 rounded-lg">
+                        <div key={i} className="flex items-start gap-2 p-2 bg-[#F59E0B]/[0.06] rounded-md border border-[#F59E0B]/[0.15]">
+                          <AlertTriangle className="w-4 h-4 text-[#F59E0B] mt-0.5 shrink-0" />
                           <div>
-                            <p className="text-sm text-[#061b31]">{g.skill} {g.is_blocker && <span className="text-[#ea2261] text-xs">(blocker)</span>}</p>
-                            <p className="text-xs text-[#64748d]">{g.mitigation}</p>
+                            <p className="text-sm text-[#E8E8ED]">{g.skill} {g.is_blocker && <span className="text-[#EF4444] text-xs">(blocker)</span>}</p>
+                            <p className="text-xs text-[#8A8F98]">{g.mitigation}</p>
                           </div>
                         </div>
                       ))}
@@ -338,16 +355,26 @@ export default function GeneratePage() {
                 <div className="flex gap-4">
                   <button
                     onClick={() => setStep(2)}
-                    className="flex-1 py-3 px-4 border border-[#e5edf5] hover:border-[#533afd] rounded-lg font-medium transition flex items-center justify-center gap-1"
+                    className="flex-1 py-3 px-4 border border-white/[0.10] hover:border-white/[0.14] hover:bg-white/[0.04] text-[#E8E8ED] rounded-md font-medium transition-all duration-150 flex items-center justify-center gap-1"
                   >
                     <ArrowLeft className="w-4 h-4" /> Back
                   </button>
                   <button
                     onClick={handleGenerate}
                     disabled={generating}
-                    className="flex-1 py-3 px-4 bg-[#533afd] hover:bg-[#4128c9] disabled:opacity-50 text-white rounded-lg font-medium transition"
+                    className="flex-1 py-3 px-4 bg-[#3B82F6] hover:bg-[#60A5FA] disabled:opacity-50 disabled:hover:bg-[#3B82F6] text-white rounded-md font-medium transition-all duration-150 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] flex items-center justify-center gap-2 active:scale-[0.98]"
                   >
-                    {generating ? 'Generating CV...' : 'Generate Tailored CV'}
+                    {generating ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Generating CV...
+                      </>
+                    ) : (
+                      <>
+                        Generate Tailored CV
+                        <Sparkles className="w-4 h-4" />
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
@@ -357,23 +384,26 @@ export default function GeneratePage() {
           {/* Step 4: CV Result */}
           {step === 4 && cv && (
             <div className="space-y-6">
-              <div className="p-6 bg-[#15be53]/10 border border-[#15be53]/20 rounded-xl">
+              <div className="p-6 bg-[#00D26A]/[0.08] border border-[#00D26A]/[0.25] rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[#15be53] font-medium">✓ CV Generated Successfully!</p>
-                    <p className="text-sm text-[#64748d]">{cv.job_title} at {cv.company}</p>
+                    <div className="flex items-center gap-2">
+                      <Check className="w-5 h-5 text-[#00D26A]" />
+                      <p className="text-[#00D26A] font-medium">CV Generated Successfully!</p>
+                    </div>
+                    <p className="text-sm text-[#8A8F98] ml-7">{cv.job_title} at {cv.company}</p>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-light text-[#15be53]">{cv.ats_score}%</div>
-                    <div className="text-xs text-[#64748d]">ATS Score</div>
+                    <div className="text-2xl font-medium text-[#00D26A]">{cv.ats_score}%</div>
+                    <div className="text-xs text-[#8A8F98]">ATS Score</div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl border border-[#e5edf5] p-6">
-                <h3 className="font-medium mb-4 text-[#061b31]">Preview:</h3>
+              <div className="bg-[#1A1A24] rounded-lg border border-white/[0.06] p-6">
+                <h3 className="font-medium mb-4 text-[#E8E8ED]">Preview:</h3>
                 <div
-                  className="prose max-w-none"
+                  className="prose max-w-none prose-invert"
                   dangerouslySetInnerHTML={{ __html: cv.html_content }}
                 />
               </div>
@@ -381,7 +411,7 @@ export default function GeneratePage() {
               <div className="flex gap-4">
                 <button
                   onClick={handleDownload}
-                  className="flex-1 py-3 px-4 bg-[#15be53] hover:bg-[#0d9e42] text-white rounded-lg font-medium transition flex items-center justify-center gap-1.5"
+                  className="flex-1 py-3 px-4 bg-[#00D26A]/[0.12] hover:bg-[#00D26A]/[0.2] text-[#00D26A] border border-[#00D26A]/[0.25] rounded-md font-medium transition-all duration-150 flex items-center justify-center gap-1.5 active:scale-[0.98]"
                 >
                   <Download className="w-4 h-4" /> Download PDF
                 </button>
@@ -393,7 +423,7 @@ export default function GeneratePage() {
                     setJobDescription('')
                     setJobUrl('')
                   }}
-                  className="flex-1 py-3 px-4 border border-[#e5edf5] hover:border-[#533afd] rounded-lg font-medium transition flex items-center justify-center gap-1.5"
+                  className="flex-1 py-3 px-4 border border-white/[0.10] hover:border-white/[0.14] hover:bg-white/[0.04] text-[#E8E8ED] rounded-md font-medium transition-all duration-150 flex items-center justify-center gap-1.5"
                 >
                   <RotateCcw className="w-4 h-4" /> Generate Another
                 </button>

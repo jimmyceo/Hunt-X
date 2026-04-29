@@ -9,28 +9,31 @@ import {
   ArrowRight,
   Star,
   Quote,
+  Sparkles,
+  Zap,
+  Activity,
 } from 'lucide-react'
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white text-[#061b31]">
+    <main className="min-h-screen bg-[#0B0B0F] text-[#E8E8ED]">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#e5edf5]">
-        <div className="max-w-[1080px] mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="text-xl font-normal tracking-tight" style={{ fontFamily: 'sohne-var, SF Pro Display, system-ui, sans-serif' }}>
+      <nav className="sticky top-0 z-50 bg-[#0B0B0F]/80 backdrop-blur-md border-b border-white/[0.06]">
+        <div className="max-w-[1200px] mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href="/" className="text-xl font-medium tracking-tight text-[#E8E8ED]">
             Hunt-X
           </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm text-[#64748d]">
-            <a href="#features" className="hover:text-[#061b31] transition">Features</a>
-            <a href="#how-it-works" className="hover:text-[#061b31] transition">How It Works</a>
-            <a href="/pricing" className="hover:text-[#061b31] transition">Pricing</a>
-            <a href="#faq" className="hover:text-[#061b31] transition">FAQ</a>
+          <div className="hidden md:flex items-center gap-8 text-sm text-[#8A8F98]">
+            <a href="#features" className="hover:text-[#E8E8ED] transition-colors duration-150">Features</a>
+            <a href="#how-it-works" className="hover:text-[#E8E8ED] transition-colors duration-150">How It Works</a>
+            <a href="/pricing" className="hover:text-[#E8E8ED] transition-colors duration-150">Pricing</a>
+            <a href="#faq" className="hover:text-[#E8E8ED] transition-colors duration-150">FAQ</a>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/auth" className="text-sm px-4 py-2 text-[#061b31] hover:bg-[#f6f9fc] rounded transition">
+            <Link href="/auth" className="text-sm px-4 py-2 text-[#E8E8ED] hover:bg-white/[0.04] rounded-md transition-colors duration-150">
               Sign In
             </Link>
-            <Link href="/upload" className="text-sm px-4 py-2 bg-[#533afd] text-white rounded hover:bg-[#4338ca] transition">
+            <Link href="/upload" className="text-sm px-4 py-2 bg-[#3B82F6] text-white rounded-md hover:bg-[#60A5FA] transition-all duration-150 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]">
               Get Started
             </Link>
           </div>
@@ -38,66 +41,76 @@ export default function Home() {
       </nav>
 
       {/* Hero */}
-      <section className="pt-20 pb-16 text-center">
-        <div className="max-w-[1080px] mx-auto px-4">
-          <span className="inline-block px-3 py-1 text-xs text-[#64748d] bg-[#f6f9fc] rounded-full mb-6">
-            AI-Powered Job Search
-          </span>
-          <h1 className="text-4xl md:text-6xl font-light tracking-tight mb-6" style={{ letterSpacing: '-1.4px', fontFamily: 'sohne-var, SF Pro Display, system-ui, sans-serif' }}>
-            Land Your Dream Job, Faster.
+      <section className="pt-20 pb-16 text-center relative overflow-hidden">
+        {/* Subtle gradient glow behind hero */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#3B82F6]/[0.07] rounded-full blur-[120px] pointer-events-none" />
+
+        <div className="max-w-[1200px] mx-auto px-4 relative">
+          {/* AI Activity Badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#3B82F6]/[0.12] border border-[#3B82F6]/[0.25] rounded-full mb-8">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#3B82F6] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#3B82F6]" />
+            </span>
+            <span className="text-xs text-[#60A5FA] font-medium">AI Agent Active</span>
+          </div>
+
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-medium tracking-tight mb-6" style={{ letterSpacing: '-2px', lineHeight: 1.0 }}>
+            Your Career Agent,<br />Always On.
           </h1>
-          <p className="text-lg md:text-xl text-[#64748d] max-w-2xl mx-auto mb-10 leading-relaxed font-light">
-            Upload your resume, get AI-optimized CVs, discover matching jobs, and track every application — all in one place.
+          <p className="text-lg md:text-xl text-[#8A8F98] max-w-2xl mx-auto mb-10 leading-relaxed">
+            An autonomous AI that finds, analyzes, and applies to jobs for you.
+            Upload your resume. Let the agent do the rest.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
             <Link
               href="/upload"
-              className="px-8 py-3 bg-[#533afd] text-white rounded font-normal hover:bg-[#4338ca] transition"
+              className="px-8 py-3 bg-[#3B82F6] text-white rounded-md font-medium hover:bg-[#60A5FA] transition-all duration-150 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] active:scale-[0.98]"
             >
               Start Free
             </Link>
             <Link
               href="#how-it-works"
-              className="px-8 py-3 border border-[#b9b9f9] text-[#533afd] rounded hover:bg-[#f6f9fc] transition"
+              className="px-8 py-3 border border-white/[0.10] text-[#E8E8ED] rounded-md hover:bg-white/[0.04] hover:border-white/[0.14] transition-all duration-150"
             >
               View Demo
             </Link>
           </div>
 
-          {/* Dashboard mockup */}
-          <div className="max-w-4xl mx-auto rounded-xl border border-[#e5edf5] bg-white shadow-[0_30px_45px_-30px_rgba(50,50,93,0.25),0_18px_36px_-18px_rgba(0,0,0,0.1)] overflow-hidden">
-            <div className="p-8 md:p-12 bg-[#f6f9fc]">
-              <div className="grid grid-cols-3 gap-4 mb-8">
-                <div className="p-4 bg-white rounded-lg border border-[#e5edf5]">
-                  <div className="text-2xl font-light text-[#061b31]">24</div>
-                  <div className="text-sm text-[#64748d]">Jobs Applied</div>
-                </div>
-                <div className="p-4 bg-white rounded-lg border border-[#e5edf5]">
-                  <div className="text-2xl font-light text-[#061b31]">5</div>
-                  <div className="text-sm text-[#64748d]">Interviews</div>
-                </div>
-                <div className="p-4 bg-white rounded-lg border border-[#e5edf5]">
-                  <div className="text-2xl font-light text-[#15be53]">87%</div>
-                  <div className="text-sm text-[#64748d]">Match Score</div>
-                </div>
+          {/* AI Activity Panel */}
+          <div className="max-w-3xl mx-auto rounded-xl border border-white/[0.06] bg-[#12121A] overflow-hidden">
+            <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/[0.06]">
+              <div className="flex gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-[#EF4444]/60" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]/60" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#00D26A]/60" />
               </div>
-              <div className="space-y-3">
-                <div className="flex items-center gap-4 p-3 bg-white rounded-lg border border-[#e5edf5]">
-                  <div className="w-10 h-10 rounded-full bg-[#f6f9fc] flex items-center justify-center text-[#64748d]">S</div>
-                  <div className="flex-1 text-left">
-                    <div className="text-sm font-normal text-[#061b31]">Senior Frontend Engineer</div>
-                    <div className="text-xs text-[#64748d]">Stripe — Remote</div>
-                  </div>
-                  <span className="px-2 py-1 text-xs bg-[rgba(21,190,83,0.2)] text-[#108c3d] rounded">94%</span>
-                </div>
-                <div className="flex items-center gap-4 p-3 bg-white rounded-lg border border-[#e5edf5]">
-                  <div className="w-10 h-10 rounded-full bg-[#f6f9fc] flex items-center justify-center text-[#64748d]">V</div>
-                  <div className="flex-1 text-left">
-                    <div className="text-sm font-normal text-[#061b31]">Product Designer</div>
-                    <div className="text-xs text-[#64748d]">Vercel — Remote</div>
-                  </div>
-                  <span className="px-2 py-1 text-xs bg-[rgba(83,58,253,0.08)] text-[#533afd] rounded">89%</span>
-                </div>
+              <span className="text-xs text-[#5A5E66] ml-2 font-mono">agent.log</span>
+            </div>
+            <div className="p-6 text-left font-mono text-sm space-y-2">
+              <div className="flex items-start gap-3 animate-fade-in">
+                <span className="text-[#5A5E66] shrink-0">10:42:03</span>
+                <span className="text-[#8A8F98]">Scanning <span className="text-[#3B82F6]">12,421</span> active job postings...</span>
+              </div>
+              <div className="flex items-start gap-3 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                <span className="text-[#5A5E66] shrink-0">10:42:05</span>
+                <span className="text-[#8A8F98]">Filtering low-fit matches with ML classifier</span>
+              </div>
+              <div className="flex items-start gap-3 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                <span className="text-[#5A5E66] shrink-0">10:42:07</span>
+                <span className="text-[#8A8F98]">Ranked <span className="text-[#00D26A]">847</span> high-probability opportunities</span>
+              </div>
+              <div className="flex items-start gap-3 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+                <span className="text-[#5A5E66] shrink-0">10:42:09</span>
+                <span className="text-[#8A8F98]">Optimizing CV for <span className="text-[#E8E8ED]">Senior Frontend Engineer @ Stripe</span></span>
+              </div>
+              <div className="flex items-start gap-3 animate-fade-in" style={{ animationDelay: '0.8s' }}>
+                <span className="text-[#5A5E66] shrink-0">10:42:11</span>
+                <span className="text-[#8A8F98]">Match score: <span className="text-[#00D26A]">94%</span> — generating tailored application...</span>
+              </div>
+              {/* Animated scan line */}
+              <div className="relative h-px mt-4 overflow-hidden">
+                <div className="absolute inset-0 bg-[#3B82F6]/[0.4] animate-scan-line" />
               </div>
             </div>
           </div>
@@ -105,25 +118,30 @@ export default function Home() {
       </section>
 
       {/* Trust Bar */}
-      <section className="border-y border-[#e5edf5] py-8">
-        <div className="max-w-[1080px] mx-auto px-4 text-center">
-          <p className="text-sm text-[#64748d] mb-4">Trusted by job seekers at</p>
-          <div className="flex items-center justify-center gap-8 opacity-50 grayscale">
+      <section className="border-y border-white/[0.06] py-8 bg-[#12121A]">
+        <div className="max-w-[1200px] mx-auto px-4 text-center">
+          <p className="text-sm text-[#5A5E66] mb-4 uppercase tracking-wider">Trusted by job seekers at</p>
+          <div className="flex items-center justify-center gap-8 opacity-40">
             {['Stripe', 'Vercel', 'Linear', 'Figma', 'Notion'].map((company) => (
-              <span key={company} className="text-lg font-light text-[#64748d]">{company}</span>
+              <span key={company} className="text-lg font-medium text-[#8A8F98]">{company}</span>
             ))}
           </div>
         </div>
       </section>
 
       {/* Features */}
-      <section id="features" className="py-20">
-        <div className="max-w-[1080px] mx-auto px-4">
-          <div className="text-center mb-12">
-            <span className="text-xs text-[#64748d] uppercase tracking-wider">Features</span>
-            <h2 className="text-3xl font-light mt-2 text-[#061b31]">Everything You Need to Win the Job Hunt</h2>
+      <section id="features" className="py-24">
+        <div className="max-w-[1200px] mx-auto px-4">
+          <div className="text-center mb-16">
+            <span className="text-xs text-[#5A5E66] uppercase tracking-wider">Features</span>
+            <h2 className="text-3xl md:text-4xl font-medium mt-3" style={{ letterSpacing: '-0.8px', lineHeight: 1.1 }}>
+              Everything You Need to Win
+            </h2>
+            <p className="text-[#8A8F98] mt-4 max-w-lg mx-auto">
+              A complete autonomous career agent — not just another job board.
+            </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-5">
             {[
               { icon: FileSearch, title: 'AI Resume Analysis', desc: 'Upload your resume and get instant AI feedback on structure, keywords, and ATS compatibility.' },
               { icon: FilePlus, title: 'Tailored CV Generation', desc: 'Generate ATS-optimized CVs tailored to any job description in seconds.' },
@@ -132,12 +150,12 @@ export default function Home() {
               { icon: MessagesSquare, title: 'Interview Prep', desc: 'AI-generated interview questions and answers based on your target role.' },
               { icon: Mail, title: 'Cover Letters', desc: 'Personalized cover letters that match the job and highlight your strengths.' },
             ].map((feature) => (
-              <div key={feature.title} className="p-6 bg-white rounded-lg border border-[#e5edf5] shadow-[0_15px_35px_rgba(23,23,23,0.08)] hover:shadow-[0_20px_40px_rgba(23,23,23,0.12)] transition">
-                <div className="w-10 h-10 rounded-lg bg-[rgba(83,58,253,0.08)] flex items-center justify-center mb-3">
-                  <feature.icon className="w-5 h-5 text-[#533afd]" />
+              <div key={feature.title} className="p-6 bg-[#1A1A24] rounded-lg border border-white/[0.06] hover:border-white/[0.10] transition-colors duration-150 group">
+                <div className="w-10 h-10 rounded-lg bg-[#3B82F6]/[0.12] flex items-center justify-center mb-4 group-hover:shadow-[0_0_16px_rgba(59,130,246,0.2)] transition-all duration-150">
+                  <feature.icon className="w-5 h-5 text-[#60A5FA]" />
                 </div>
-                <h3 className="text-lg font-light text-[#061b31] mb-2">{feature.title}</h3>
-                <p className="text-sm text-[#64748d] leading-relaxed">{feature.desc}</p>
+                <h3 className="text-lg font-medium text-[#E8E8ED] mb-2">{feature.title}</h3>
+                <p className="text-sm text-[#8A8F98] leading-relaxed">{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -145,22 +163,25 @@ export default function Home() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-20 bg-[#f6f9fc]">
-        <div className="max-w-[1080px] mx-auto px-4 text-center">
-          <h2 className="text-3xl font-light text-[#061b31] mb-12">How Hunt-X Works</h2>
+      <section id="how-it-works" className="py-24 bg-[#12121A] border-y border-white/[0.06]">
+        <div className="max-w-[1200px] mx-auto px-4 text-center">
+          <span className="text-xs text-[#5A5E66] uppercase tracking-wider">Process</span>
+          <h2 className="text-3xl md:text-4xl font-medium mt-3 mb-16" style={{ letterSpacing: '-0.8px', lineHeight: 1.1 }}>
+            How Hunt-X Works
+          </h2>
           <div className="grid md:grid-cols-3 gap-8 relative">
-            <div className="hidden md:block absolute top-12 left-[16.67%] right-[16.67%] h-px border-t border-dashed border-[#b9b9f9]" />
+            <div className="hidden md:block absolute top-12 left-[16.67%] right-[16.67%] h-px border-t border-dashed border-white/[0.08]" />
             {[
               { step: '1', title: 'Upload', desc: 'Upload your resume in PDF, DOCX, or TXT format.' },
               { step: '2', title: 'Analyze', desc: 'Our AI analyzes your skills, experience, and gaps.' },
-              { step: '3', title: 'Apply &amp; Track', desc: 'Generate tailored CVs and track applications.' },
+              { step: '3', title: 'Apply & Track', desc: 'Generate tailored CVs and track applications.' },
             ].map((item) => (
               <div key={item.step} className="relative">
-                <div className="w-12 h-12 mx-auto mb-4 rounded-full border-2 border-dashed border-[#b9b9f9] flex items-center justify-center text-[#533afd] font-light text-lg">
+                <div className="w-12 h-12 mx-auto mb-4 rounded-full border border-dashed border-[#3B82F6]/40 flex items-center justify-center text-[#3B82F6] font-medium text-lg bg-[#0B0B0F]">
                   {item.step}
                 </div>
-                <h3 className="text-xl font-light text-[#061b31] mb-2">{item.title}</h3>
-                <p className="text-sm text-[#64748d]">{item.desc}</p>
+                <h3 className="text-xl font-medium text-[#E8E8ED] mb-2">{item.title}</h3>
+                <p className="text-sm text-[#8A8F98]">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -168,13 +189,15 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20">
-        <div className="max-w-[1080px] mx-auto px-4">
-          <div className="text-center mb-12">
-            <span className="text-xs text-[#64748d] uppercase tracking-wider">Testimonials</span>
-            <h2 className="text-3xl font-light mt-2 text-[#061b31]">Loved by Job Seekers</h2>
+      <section className="py-24">
+        <div className="max-w-[1200px] mx-auto px-4">
+          <div className="text-center mb-16">
+            <span className="text-xs text-[#5A5E66] uppercase tracking-wider">Testimonials</span>
+            <h2 className="text-3xl md:text-4xl font-medium mt-3" style={{ letterSpacing: '-0.8px', lineHeight: 1.1 }}>
+              Loved by Job Seekers
+            </h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-5">
             {[
               {
                 name: 'Sarah K.',
@@ -195,17 +218,17 @@ export default function Home() {
                 rating: 5,
               },
             ].map((t) => (
-              <div key={t.name} className="p-6 bg-white rounded-xl border border-[#e5edf5] shadow-[0_15px_35px_rgba(23,23,23,0.08)]">
-                <Quote className="w-8 h-8 text-[#533afd] mb-4 opacity-20" />
-                <p className="text-[#061b31] mb-4 leading-relaxed">"{t.quote}"</p>
+              <div key={t.name} className="p-6 bg-[#1A1A24] rounded-lg border border-white/[0.06]">
+                <Quote className="w-8 h-8 text-[#3B82F6] mb-4 opacity-30" />
+                <p className="text-[#E8E8ED] mb-4 leading-relaxed">&ldquo;{t.quote}&rdquo;</p>
                 <div className="flex items-center gap-1 mb-3">
                   {Array.from({ length: t.rating }).map((_, i) => (
-                    <Star key={i} className="w-4 h-4 text-[#9b6829] fill-[#9b6829]" />
+                    <Star key={i} className="w-4 h-4 text-[#F59E0B] fill-[#F59E0B]" />
                   ))}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-[#061b31]">{t.name}</p>
-                  <p className="text-xs text-[#64748d]">{t.role}</p>
+                  <p className="text-sm font-medium text-[#E8E8ED]">{t.name}</p>
+                  <p className="text-xs text-[#8A8F98]">{t.role}</p>
                 </div>
               </div>
             ))}
@@ -214,11 +237,14 @@ export default function Home() {
       </section>
 
       {/* Pricing Preview */}
-      <section id="pricing" className="py-20">
-        <div className="max-w-[1080px] mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-light text-[#061b31] mb-2">Simple, Transparent Pricing</h2>
-            <p className="text-[#64748d]">Start free. Upgrade when you are ready to accelerate your job search.</p>
+      <section id="pricing" className="py-24 bg-[#12121A] border-y border-white/[0.06]">
+        <div className="max-w-[1200px] mx-auto px-4">
+          <div className="text-center mb-16">
+            <span className="text-xs text-[#5A5E66] uppercase tracking-wider">Pricing</span>
+            <h2 className="text-3xl md:text-4xl font-medium mt-3 mb-2" style={{ letterSpacing: '-0.8px', lineHeight: 1.1 }}>
+              Simple, Transparent Pricing
+            </h2>
+            <p className="text-[#8A8F98]">Start free. Upgrade when you are ready to accelerate your job search.</p>
           </div>
           <div className="grid md:grid-cols-4 gap-4">
             {[
@@ -229,18 +255,18 @@ export default function Home() {
             ].map((plan) => (
               <div
                 key={plan.name}
-                className={`p-6 rounded-lg border ${plan.featured ? 'border-t-4 border-t-[#533afd] border-[#e5edf5] shadow-[0_30px_45px_-30px_rgba(50,50,93,0.25)]' : 'border-[#e5edf5]'} bg-white flex flex-col`}
+                className={`p-6 rounded-lg border flex flex-col ${plan.featured ? 'border-[#3B82F6]/[0.4] shadow-[0_0_30px_rgba(59,130,246,0.15)]' : 'border-white/[0.06]'} bg-[#1A1A24]`}
               >
-                <div className={`text-sm mb-2 ${plan.featured ? 'text-[#533afd]' : 'text-[#64748d]'}`}>{plan.name}</div>
-                <div className="text-4xl font-light text-[#061b31] mb-1">{plan.price}</div>
-                <div className="text-sm text-[#64748d] mb-4">{plan.period}</div>
-                <p className="text-sm text-[#64748d] mb-6 flex-1">{plan.desc}</p>
+                <div className={`text-sm mb-2 ${plan.featured ? 'text-[#60A5FA]' : 'text-[#8A8F98]'}`}>{plan.name}</div>
+                <div className="text-4xl font-medium text-[#E8E8ED] mb-1">{plan.price}</div>
+                <div className="text-sm text-[#8A8F98] mb-4">{plan.period}</div>
+                <p className="text-sm text-[#8A8F98] mb-6 flex-1">{plan.desc}</p>
                 <Link
                   href={plan.name === 'Free' ? '/upload' : '/pricing'}
-                  className={`block w-full py-2 text-center rounded text-sm font-normal transition ${
+                  className={`block w-full py-2.5 text-center rounded-md text-sm font-medium transition-all duration-150 active:scale-[0.98] ${
                     plan.featured
-                      ? 'bg-[#533afd] text-white hover:bg-[#4338ca]'
-                      : 'border border-[#b9b9f9] text-[#533afd] hover:bg-[#f6f9fc]'
+                      ? 'bg-[#3B82F6] text-white hover:bg-[#60A5FA] hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]'
+                      : 'border border-white/[0.10] text-[#E8E8ED] hover:bg-white/[0.04] hover:border-white/[0.14]'
                   }`}
                 >
                   {plan.cta}
@@ -249,22 +275,24 @@ export default function Home() {
             ))}
           </div>
           <div className="text-center mt-6">
-            <Link href="/pricing" className="text-sm text-[#533afd] hover:underline">
+            <Link href="/pricing" className="text-sm text-[#60A5FA] hover:text-[#3B82F6] transition-colors duration-150 inline-flex items-center gap-1">
               View Full Pricing
-              <ArrowRight className="w-3.5 h-3.5 inline ml-0.5" />
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="py-20 bg-[#f6f9fc]">
-        <div className="max-w-[1080px] mx-auto px-4">
-          <div className="text-center mb-12">
-            <span className="text-xs text-[#64748d] uppercase tracking-wider">FAQ</span>
-            <h2 className="text-3xl font-light mt-2 text-[#061b31]">Frequently Asked Questions</h2>
+      <section id="faq" className="py-24">
+        <div className="max-w-[1200px] mx-auto px-4">
+          <div className="text-center mb-16">
+            <span className="text-xs text-[#5A5E66] uppercase tracking-wider">FAQ</span>
+            <h2 className="text-3xl md:text-4xl font-medium mt-3" style={{ letterSpacing: '-0.8px', lineHeight: 1.1 }}>
+              Frequently Asked Questions
+            </h2>
           </div>
-          <div className="max-w-2xl mx-auto space-y-4">
+          <div className="max-w-2xl mx-auto space-y-3">
             {[
               { q: 'Can I cancel anytime?', a: 'Yes. You can cancel your subscription at any time from your account settings. Your access continues until the end of your billing period.' },
               { q: 'What happens when I hit my free limit?', a: 'You will be prompted to upgrade to a paid plan. Your existing data (resumes, evaluations) remains accessible even on the free tier.' },
@@ -272,12 +300,14 @@ export default function Home() {
               { q: 'Can I change plans later?', a: 'Absolutely. You can upgrade or downgrade at any time. Upgrades take effect immediately; downgrades apply at the next billing cycle.' },
               { q: 'Do you offer refunds?', a: 'If you are not satisfied, contact us within 14 days of your first paid subscription for a full refund.' },
             ].map((faq) => (
-              <details key={faq.q} className="group border-b border-[#e5edf5] pb-4 bg-white rounded-lg px-6 py-2">
-                <summary className="flex items-center justify-between cursor-pointer list-none py-2">
-                  <span className="text-base font-normal text-[#061b31]">{faq.q}</span>
-                  <span className="text-[#64748d] group-open:rotate-180 transition">&#9662;</span>
+              <details key={faq.q} className="group bg-[#1A1A24] rounded-lg border border-white/[0.06] overflow-hidden">
+                <summary className="flex items-center justify-between cursor-pointer list-none px-6 py-4 hover:bg-white/[0.02] transition-colors duration-150">
+                  <span className="text-sm font-medium text-[#E8E8ED]">{faq.q}</span>
+                  <span className="text-[#8A8F98] group-open:rotate-180 transition-transform duration-150">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </span>
                 </summary>
-                <p className="text-base text-[#64748d] pt-2 leading-relaxed">{faq.a}</p>
+                <p className="text-sm text-[#8A8F98] px-6 pb-4 leading-relaxed">{faq.a}</p>
               </details>
             ))}
           </div>
@@ -285,15 +315,18 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-[#1c1e54]">
-        <div className="max-w-[1080px] mx-auto px-4 text-center">
-          <h2 className="text-3xl font-light text-white mb-4">Ready to Supercharge Your Job Search?</h2>
-          <p className="text-base text-white/70 mb-8 max-w-xl mx-auto">
+      <section className="py-24 bg-[#12121A] border-t border-white/[0.06] relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#3B82F6]/[0.08] rounded-full blur-[100px] pointer-events-none" />
+        <div className="max-w-[1200px] mx-auto px-4 text-center relative">
+          <h2 className="text-3xl md:text-4xl font-medium text-[#E8E8ED] mb-4" style={{ letterSpacing: '-0.8px', lineHeight: 1.1 }}>
+            Ready to Supercharge Your Job Search?
+          </h2>
+          <p className="text-base text-[#8A8F98] mb-8 max-w-xl mx-auto">
             Join thousands of job seekers who landed offers faster with Hunt-X.
           </p>
           <Link
             href="/upload"
-            className="inline-block px-8 py-3 bg-white text-[#533afd] rounded hover:bg-gray-100 transition"
+            className="inline-block px-8 py-3 bg-[#3B82F6] text-white rounded-md font-medium hover:bg-[#60A5FA] transition-all duration-150 hover:shadow-[0_0_30px_rgba(59,130,246,0.3)] active:scale-[0.98]"
           >
             Get Started Free
           </Link>
@@ -301,42 +334,42 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 border-t border-[#e5edf5]">
-        <div className="max-w-[1080px] mx-auto px-4">
+      <footer className="py-12 border-t border-white/[0.06]">
+        <div className="max-w-[1200px] mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h4 className="text-sm font-normal text-[#061b31] mb-3">Product</h4>
-              <ul className="space-y-2 text-sm text-[#64748d]">
-                <li><a href="#features" className="hover:text-[#061b31]">Features</a></li>
-                <li><Link href="/pricing" className="hover:text-[#061b31]">Pricing</Link></li>
-                <li><Link href="/upload" className="hover:text-[#061b31]">Upload Resume</Link></li>
+              <h4 className="text-sm font-medium text-[#E8E8ED] mb-3">Product</h4>
+              <ul className="space-y-2 text-sm text-[#8A8F98]">
+                <li><a href="#features" className="hover:text-[#E8E8ED] transition-colors duration-150">Features</a></li>
+                <li><Link href="/pricing" className="hover:text-[#E8E8ED] transition-colors duration-150">Pricing</Link></li>
+                <li><Link href="/upload" className="hover:text-[#E8E8ED] transition-colors duration-150">Upload Resume</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-sm font-normal text-[#061b31] mb-3">Resources</h4>
-              <ul className="space-y-2 text-sm text-[#64748d]">
-                <li><a href="#" className="hover:text-[#061b31]">Blog</a></li>
-                <li><a href="#" className="hover:text-[#061b31]">Guides</a></li>
-                <li><a href="#" className="hover:text-[#061b31]">API Docs</a></li>
+              <h4 className="text-sm font-medium text-[#E8E8ED] mb-3">Resources</h4>
+              <ul className="space-y-2 text-sm text-[#8A8F98]">
+                <li><a href="#" className="hover:text-[#E8E8ED] transition-colors duration-150">Blog</a></li>
+                <li><a href="#" className="hover:text-[#E8E8ED] transition-colors duration-150">Guides</a></li>
+                <li><a href="#" className="hover:text-[#E8E8ED] transition-colors duration-150">API Docs</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-sm font-normal text-[#061b31] mb-3">Company</h4>
-              <ul className="space-y-2 text-sm text-[#64748d]">
-                <li><a href="#" className="hover:text-[#061b31]">About</a></li>
-                <li><a href="#" className="hover:text-[#061b31]">Careers</a></li>
-                <li><a href="#" className="hover:text-[#061b31]">Contact</a></li>
+              <h4 className="text-sm font-medium text-[#E8E8ED] mb-3">Company</h4>
+              <ul className="space-y-2 text-sm text-[#8A8F98]">
+                <li><a href="#" className="hover:text-[#E8E8ED] transition-colors duration-150">About</a></li>
+                <li><a href="#" className="hover:text-[#E8E8ED] transition-colors duration-150">Careers</a></li>
+                <li><a href="#" className="hover:text-[#E8E8ED] transition-colors duration-150">Contact</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-sm font-normal text-[#061b31] mb-3">Legal</h4>
-              <ul className="space-y-2 text-sm text-[#64748d]">
-                <li><a href="#" className="hover:text-[#061b31]">Privacy</a></li>
-                <li><a href="#" className="hover:text-[#061b31]">Terms</a></li>
+              <h4 className="text-sm font-medium text-[#E8E8ED] mb-3">Legal</h4>
+              <ul className="space-y-2 text-sm text-[#8A8F98]">
+                <li><a href="#" className="hover:text-[#E8E8ED] transition-colors duration-150">Privacy</a></li>
+                <li><a href="#" className="hover:text-[#E8E8ED] transition-colors duration-150">Terms</a></li>
               </ul>
             </div>
           </div>
-          <div className="pt-8 border-t border-[#e5edf5] text-center text-sm text-[#64748d]">
+          <div className="pt-8 border-t border-white/[0.06] text-center text-sm text-[#5A5E66]">
             &copy; 2026 Hunt-X. All rights reserved.
           </div>
         </div>

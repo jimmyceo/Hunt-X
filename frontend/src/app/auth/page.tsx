@@ -13,7 +13,7 @@ function getPasswordStrength(password: string): { score: number; label: string; 
   if (/[^A-Za-z0-9]/.test(password)) score += 1;
 
   const labels = ['Weak', 'Fair', 'Good', 'Strong'];
-  const colors = ['#ea2261', '#9b6829', '#15be53', '#15be53'];
+  const colors = ['#EF4444', '#F59E0B', '#00D26A', '#00D26A'];
   return { score, label: labels[Math.min(score, 3)], color: colors[Math.min(score, 3)] };
 }
 
@@ -73,42 +73,51 @@ export default function AuthPage() {
   };
 
   const inputClass = (field: string) =>
-    `w-full px-4 py-3 rounded-lg bg-white border text-[#061b31] placeholder:text-[#64748d]/50 focus:outline-none focus:border-[#533afd] focus:ring-1 focus:ring-[#533afd]/20 transition ${
+    `w-full px-4 py-3 rounded-md bg-white/[0.02] border text-[#E8E8ED] placeholder:text-[#5A5E66] focus:outline-none focus:border-[#3B82F6] focus:shadow-[0_0_0_3px_rgba(59,130,246,0.2)] transition-colors duration-150 ${
       touched[field] && validate().some((e) => e.toLowerCase().includes(field))
-        ? 'border-[#ea2261]'
-        : 'border-[#e5edf5]'
+        ? 'border-[#EF4444]'
+        : 'border-white/[0.08]'
     }`;
 
   return (
-    <div className="min-h-screen flex" style={{ fontFamily: 'sohne-var, SF Pro Display, system-ui, sans-serif' }}>
+    <div className="min-h-screen flex bg-[#0B0B0F]">
       {/* Left Panel */}
-      <div className="hidden lg:flex lg:w-[45%] bg-[#1c1e54] relative flex-col justify-between p-12 text-white overflow-hidden">
+      <div className="hidden lg:flex lg:w-[45%] bg-[#12121A] relative flex-col justify-between p-12 text-white overflow-hidden border-r border-white/[0.06]">
         {/* Decorative gradient shapes */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#533afd] rounded-full blur-[120px] opacity-20 -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#f96bee] rounded-full blur-[100px] opacity-15 translate-y-1/3 -translate-x-1/4" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#3B82F6] rounded-full blur-[120px] opacity-10 -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#3B82F6] rounded-full blur-[100px] opacity-5 translate-y-1/3 -translate-x-1/4" />
 
         {/* Top Logo */}
         <div className="relative z-10">
-          <Link href="/" className="text-2xl font-normal tracking-tight text-white">
+          <Link href="/" className="text-2xl font-medium tracking-tight text-[#E8E8ED]">
             Hunt-X
           </Link>
         </div>
 
         {/* Center Content */}
         <div className="relative z-10 flex-1 flex flex-col justify-center">
-          <h2 className="text-5xl font-light tracking-tight mb-4" style={{ letterSpacing: '-0.96px' }}>
+          <h2 className="text-5xl font-medium tracking-tight mb-4 text-[#E8E8ED]" style={{ letterSpacing: '-0.96px', lineHeight: 1.0 }}>
             {isLogin ? 'Welcome Back.' : 'Start Here.'}
           </h2>
-          <p className="text-lg text-white/70 font-light mb-12">
-            Your next career move starts here.
+          <p className="text-lg text-[#8A8F98] mb-12">
+            Your autonomous career agent is ready.
           </p>
 
+          {/* AI Activity Indicator */}
+          <div className="flex items-center gap-2 mb-8">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#3B82F6] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#3B82F6]" />
+            </span>
+            <span className="text-xs text-[#60A5FA] font-mono">AGENT ACTIVE — SCANNING 12,421 JOBS</span>
+          </div>
+
           {/* Testimonial */}
-          <div className="border-l-2 border-[#533afd] pl-6">
-            <p className="text-sm italic text-white/50 leading-relaxed mb-3">
+          <div className="border-l-2 border-[#3B82F6] pl-6">
+            <p className="text-sm italic text-[#8A8F98] leading-relaxed mb-3">
               "Hunt-X helped me land 3 interviews in my first week. The AI-generated CVs are incredible."
             </p>
-            <p className="text-xs text-white/40">
+            <p className="text-xs text-[#5A5E66]">
               — Sarah K., Product Designer
             </p>
           </div>
@@ -116,48 +125,48 @@ export default function AuthPage() {
 
         {/* Bottom */}
         <div className="relative z-10">
-          <div className="flex items-center gap-2 text-xs text-white/40">
+          <div className="flex items-center gap-2 text-xs text-[#5A5E66]">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>AI-Powered Job Search</span>
+            <span>AI-Powered Career Agent</span>
           </div>
         </div>
       </div>
 
       {/* Right Panel */}
-      <div className="flex-1 flex items-center justify-center bg-[#f6f9fc] p-6 lg:p-12">
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-8">
-            <Link href="/" className="text-2xl font-normal tracking-tight text-[#061b31]">
+            <Link href="/" className="text-2xl font-medium tracking-tight text-[#E8E8ED]">
               Hunt-X
             </Link>
           </div>
 
-          <div className="bg-white rounded-xl p-8 border border-[#e5edf5] shadow-[0_15px_35px_rgba(23,23,23,0.08)]">
+          <div className="bg-[#1A1A24] rounded-lg p-8 border border-white/[0.06]">
             {/* Tab Toggle */}
-            <div className="flex mb-8 border-b border-[#e5edf5]">
+            <div className="flex mb-8 border-b border-white/[0.06]">
               <button
                 onClick={() => { setIsLogin(false); setError(''); setTouched({}); }}
-                className={`flex-1 pb-3 text-sm font-normal transition relative ${
-                  !isLogin ? 'text-[#061b31]' : 'text-[#64748d] hover:text-[#061b31]'
+                className={`flex-1 pb-3 text-sm font-medium transition-colors duration-150 relative ${
+                  !isLogin ? 'text-[#E8E8ED]' : 'text-[#5A5E66] hover:text-[#8A8F98]'
                 }`}
               >
                 Create Account
-                {!isLogin && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#533afd] rounded-full" />}
+                {!isLogin && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#3B82F6] rounded-full" />}
               </button>
               <button
                 onClick={() => { setIsLogin(true); setError(''); setTouched({}); }}
-                className={`flex-1 pb-3 text-sm font-normal transition relative ${
-                  isLogin ? 'text-[#061b31]' : 'text-[#64748d] hover:text-[#061b31]'
+                className={`flex-1 pb-3 text-sm font-medium transition-colors duration-150 relative ${
+                  isLogin ? 'text-[#E8E8ED]' : 'text-[#5A5E66] hover:text-[#8A8F98]'
                 }`}
               >
                 Sign In
-                {isLogin && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#533afd] rounded-full" />}
+                {isLogin && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#3B82F6] rounded-full" />}
               </button>
             </div>
 
             {error && (
-              <div className="mb-4 p-4 rounded-lg bg-[#ea2261]/10 border border-[#ea2261]/20 text-[#ea2261] text-sm">
+              <div className="mb-4 p-4 rounded-md bg-[#EF4444]/10 border border-[#EF4444]/20 text-[#EF4444] text-sm">
                 {error}
               </div>
             )}
@@ -165,7 +174,7 @@ export default function AuthPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {!isLogin && (
                 <div>
-                  <label className="block text-sm font-medium text-[#273951] mb-1.5">
+                  <label className="block text-sm font-medium text-[#8A8F98] mb-1.5">
                     Full Name
                   </label>
                   <input
@@ -180,7 +189,7 @@ export default function AuthPage() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-[#273951] mb-1.5">
+                <label className="block text-sm font-medium text-[#8A8F98] mb-1.5">
                   Email
                 </label>
                 <input
@@ -194,7 +203,7 @@ export default function AuthPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#273951] mb-1.5">
+                <label className="block text-sm font-medium text-[#8A8F98] mb-1.5">
                   Password
                 </label>
                 <div className="relative">
@@ -210,7 +219,7 @@ export default function AuthPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748d] hover:text-[#061b31] transition p-1"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5A5E66] hover:text-[#8A8F98] transition-colors duration-150 p-1"
                     tabIndex={-1}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -221,7 +230,7 @@ export default function AuthPage() {
                 {!isLogin && password.length > 0 && (
                   <div className="mt-2">
                     <div className="flex items-center gap-2 mb-1">
-                      <div className="flex-1 h-1 bg-[#e5edf5] rounded-full overflow-hidden">
+                      <div className="flex-1 h-1 bg-white/[0.06] rounded-full overflow-hidden">
                         <div
                           className="h-full transition-all duration-300 rounded-full"
                           style={{
@@ -230,7 +239,7 @@ export default function AuthPage() {
                           }}
                         />
                       </div>
-                      <span className="text-xs text-[#64748d]">{strength.label}</span>
+                      <span className="text-xs text-[#5A5E66]">{strength.label}</span>
                     </div>
                     <div className="flex flex-wrap gap-x-3 gap-y-1">
                       {[
@@ -241,8 +250,8 @@ export default function AuthPage() {
                       ].map((req) => (
                         <span
                           key={req.text}
-                          className={`flex items-center gap-1 text-xs transition ${
-                            req.test ? 'text-[#15be53]' : 'text-[#64748d]/60'
+                          className={`flex items-center gap-1 text-xs transition-colors duration-150 ${
+                            req.test ? 'text-[#00D26A]' : 'text-[#5A5E66]'
                           }`}
                         >
                           {req.test ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
@@ -258,7 +267,7 @@ export default function AuthPage() {
                 <div className="flex justify-end">
                   <Link
                     href="/auth/reset"
-                    className="text-xs text-[#533afd] hover:text-[#4128c9] transition"
+                    className="text-xs text-[#60A5FA] hover:text-[#3B82F6] transition-colors duration-150"
                   >
                     Forgot password?
                   </Link>
@@ -266,17 +275,17 @@ export default function AuthPage() {
               )}
 
               {!isLogin && (
-                <p className="text-xs text-[#64748d]">
+                <p className="text-xs text-[#5A5E66]">
                   By signing up, you agree to our{' '}
-                  <Link href="#" className="text-[#533afd] hover:underline">Terms</Link>
+                  <Link href="#" className="text-[#60A5FA] hover:text-[#3B82F6] transition-colors duration-150">Terms</Link>
                   {' '}and{' '}
-                  <Link href="#" className="text-[#533afd] hover:underline">Privacy Policy</Link>.
+                  <Link href="#" className="text-[#60A5FA] hover:text-[#3B82F6] transition-colors duration-150">Privacy Policy</Link>.
                 </p>
               )}
 
               <button
                 type="submit"
-                className="w-full py-3 px-4 bg-[#533afd] hover:bg-[#4338ca] text-white rounded-lg font-medium transition disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-3 px-4 bg-[#3B82F6] hover:bg-[#60A5FA] text-white rounded-md font-medium transition-all duration-150 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] disabled:opacity-50 flex items-center justify-center gap-2 active:scale-[0.98]"
                 disabled={loading}
               >
                 {loading ? (
@@ -300,12 +309,12 @@ export default function AuthPage() {
                   setError('');
                   setTouched({});
                 }}
-                className="text-sm text-[#64748d] hover:text-[#061b31] transition"
+                className="text-sm text-[#5A5E66] hover:text-[#8A8F98] transition-colors duration-150"
               >
                 {isLogin ? (
-                  <>Don&apos;t have an account? <span className="text-[#533afd]">Sign up</span></>
+                  <>Don&apos;t have an account? <span className="text-[#60A5FA]">Sign up</span></>
                 ) : (
-                  <>Already have an account? <span className="text-[#533afd]">Sign in</span></>
+                  <>Already have an account? <span className="text-[#60A5FA]">Sign in</span></>
                 )}
               </button>
             </div>

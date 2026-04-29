@@ -12,16 +12,16 @@ interface CardProps {
 
 export function Card({ children, className, variant = 'default', hover = true }: CardProps) {
   const variants = {
-    default: 'bg-white border border-[#e5edf5]',
-    highlighted: 'bg-gradient-to-b from-[#533afd]/10 to-white border-2 border-[#533afd]/30',
-    glass: 'bg-white/80 backdrop-blur-sm border border-[#e5edf5]/80'
+    default: 'bg-[#1A1A24] border border-white/[0.06]',
+    highlighted: 'bg-gradient-to-b from-[#3B82F6]/10 to-[#1A1A24] border-2 border-[#3B82F6]/30',
+    glass: 'bg-[#1A1A24]/80 backdrop-blur-sm border border-white/[0.10]'
   };
 
   return (
     <div
       className={cn(
-        'rounded-xl p-6 transition-all duration-300',
-        hover && 'hover:-translate-y-1 hover:shadow-[0_15px_35px_rgba(23,23,23,0.08)]',
+        'rounded-lg p-6 transition-all duration-150',
+        hover && 'hover:border-white/[0.10] hover:bg-[#22222E]',
         variants[variant],
         className
       )}
@@ -41,13 +41,13 @@ export function CardHeader({ title, subtitle, icon }: CardHeaderProps) {
   return (
     <div className="flex items-start gap-4 mb-4">
       {icon && (
-        <div className="w-10 h-10 rounded-lg bg-[#f6f9fc] flex items-center justify-center text-[#64748d]">
+        <div className="w-10 h-10 rounded-lg bg-[#3B82F6]/[0.12] flex items-center justify-center text-[#60A5FA]">
           {icon}
         </div>
       )}
       <div>
-        <h3 className="font-normal text-lg text-[#061b31]">{title}</h3>
-        {subtitle && <p className="text-sm text-[#64748d]">{subtitle}</p>}
+        <h3 className="font-medium text-lg text-[#E8E8ED]">{title}</h3>
+        {subtitle && <p className="text-sm text-[#8A8F98]">{subtitle}</p>}
       </div>
     </div>
   );

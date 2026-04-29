@@ -269,6 +269,121 @@ export const apiClient = {
     return handleResponse(res);
   },
 
+  // ============ INTERVIEW PREP ============
+  async generateInterviewPrep(evaluationId: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/interview/prep`, {
+      method: 'POST',
+      headers: jsonHeaders(),
+      body: JSON.stringify({ evaluation_id: evaluationId }),
+    });
+    return handleResponse(res);
+  },
+
+  async getInterviewPrep(prepId: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/interview/${prepId}`, {
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  async getInterviewPrepByEvaluation(evaluationId: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/interview/evaluation/${evaluationId}`, {
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  // ============ COVER LETTERS ============
+  async generateCoverLetter(evaluationId: string, hiringManagerName?: string, shortVersion?: boolean) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/cover-letter/generate`, {
+      method: 'POST',
+      headers: jsonHeaders(),
+      body: JSON.stringify({
+        evaluation_id: evaluationId,
+        hiring_manager_name: hiringManagerName,
+        short_version: shortVersion,
+      }),
+    });
+    return handleResponse(res);
+  },
+
+  async listCoverLetters() {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/cover-letter/list`, {
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  async downloadCoverLetter(coverId: string) {
+    window.open(`${API_BASE_URL}/api/cover-letter/${coverId}/download`, '_blank');
+  },
+
+  // ============ JOBS ============
+  async scanJobs(maxResults: number = 20, minMatch: number = 3.0) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/jobs/scan`, {
+      method: 'POST',
+      headers: jsonHeaders(),
+      body: JSON.stringify({ max_results_per_portal: maxResults, min_match_score: minMatch }),
+    });
+    return handleResponse(res);
+  },
+
+  async searchJobs(query: string, location: string = 'Remote', country: string = 'us') {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/jobs/search?query=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}&country=${country}`, {
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  async saveJob(jobId: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/jobs/${jobId}/save`, {
+      method: 'POST',
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  async getSavedJobs() {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/jobs/saved`, {
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  // ============ CHAT / AI CAREER COACH ============
+  async startChat(jobId: string, resumeId: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/chat/start`, {
+      method: 'POST',
+      headers: jsonHeaders(),
+      body: JSON.stringify({ job_id: jobId, resume_id: resumeId }),
+    });
+    return handleResponse(res);
+  },
+
+  async askChat(jobId: string, question: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/chat/${jobId}/ask`, {
+      method: 'POST',
+      headers: jsonHeaders(),
+      body: JSON.stringify({ question }),
+    });
+    return handleResponse(res);
+  },
+
+  async getChatHistory(jobId: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/chat/${jobId}/history`, {
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  async clearChat(jobId: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/chat/${jobId}`, {
+      method: 'DELETE',
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
   // ============ LEGACY COMPATIBILITY ============
   async checkPaymentStatus(email: string) {
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/payment/v2/status/${email}`, {

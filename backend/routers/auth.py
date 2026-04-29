@@ -76,12 +76,10 @@ async def register(
                 detail="Email already registered"
             )
 
-        # Create new user - truncate password to 72 bytes for bcrypt
-        password_bytes = user_data.password.encode('utf-8')[:72]
-        truncated_password = password_bytes.decode('utf-8', errors='ignore')
+        # Create new user
         user = User(
             email=user_data.email,
-            password_hash=get_password_hash(truncated_password),
+            password_hash=get_password_hash(user_data.password),
             name=user_data.name,
             tier="free",
             jobs_remaining=5

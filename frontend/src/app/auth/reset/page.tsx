@@ -26,47 +26,46 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f6f9fc] px-4"
-      style={{ fontFamily: 'sohne-var, SF Pro Display, system-ui, sans-serif' }}>
+    <div className="min-h-screen flex items-center justify-center bg-[#0B0B0F] px-4">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-xl p-8 border border-[#e5edf5] shadow-[0_15px_35px_rgba(23,23,23,0.08)]">
-          <Link href="/auth" className="inline-flex items-center gap-1 text-sm text-[#64748d] hover:text-[#061b31] transition mb-6">
+        <div className="bg-[#1A1A24] rounded-lg p-8 border border-white/[0.06]">
+          <Link href="/auth" className="inline-flex items-center gap-1 text-sm text-[#8A8F98] hover:text-[#E8E8ED] transition-colors duration-150 mb-6">
             <ArrowLeft className="w-4 h-4" />
             Back to sign in
           </Link>
 
           {submitted ? (
             <div className="text-center py-8">
-              <CheckCircle className="w-12 h-12 text-[#15be53] mx-auto mb-4" />
-              <h2 className="text-xl font-light text-[#061b31] mb-2">Check your email</h2>
-              <p className="text-[#64748d] text-sm mb-6">
-                If an account exists for <strong className="text-[#061b31]">{email}</strong>, you will receive a password reset link.
+              <CheckCircle className="w-12 h-12 text-[#00D26A] mx-auto mb-4" />
+              <h2 className="text-xl font-medium text-[#E8E8ED] mb-2">Check your email</h2>
+              <p className="text-[#8A8F98] text-sm mb-6">
+                If an account exists for <strong className="text-[#E8E8ED]">{email}</strong>, you will receive a password reset link.
               </p>
-              <Link href="/auth" className="text-[#533afd] hover:text-[#4128c9] text-sm">
+              <Link href="/auth" className="text-[#60A5FA] hover:text-[#3B82F6] text-sm transition-colors duration-150">
                 Return to sign in
               </Link>
             </div>
           ) : (
             <>
-              <h2 className="text-xl font-light text-[#061b31] mb-2">Reset Password</h2>
-              <p className="text-[#64748d] text-sm mb-6">
+              <h2 className="text-xl font-medium text-[#E8E8ED] mb-2">Reset Password</h2>
+              <p className="text-[#8A8F98] text-sm mb-6">
                 Enter your email address and we will send you a link to reset your password.
               </p>
 
               {error && (
-                <div className="mb-4 p-4 rounded-lg bg-[#ea2261]/10 border border-[#ea2261]/20 text-[#ea2261] text-sm">
+                <div className="mb-4 p-4 rounded-md bg-[#EF4444]/10 border border-[#EF4444]/20 text-[#EF4444] text-sm">
                   {error}
                 </div>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-[#273951] mb-1.5">Email</label>
+                  <label className="block text-sm font-medium text-[#8A8F98] mb-1.5">Email</label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg bg-white border border-[#e5edf5] text-[#061b31] placeholder:text-[#64748d]/50 focus:outline-none focus:border-[#533afd] focus:ring-1 focus:ring-[#533afd]/20 transition"
+                    className="w-full px-4 py-3 rounded-md bg-white/[0.02] border border-white/[0.08] text-[#E8E8ED] placeholder:text-[#5A5E66] focus:outline-none focus:border-[#3B82F6] focus:shadow-[0_0_0_3px_rgba(59,130,246,0.2)] transition-colors duration-150"
                     placeholder="you@example.com"
                     required
                   />
@@ -74,10 +73,15 @@ export default function ForgotPasswordPage() {
 
                 <button
                   type="submit"
-                  className="w-full py-3 px-4 bg-[#533afd] hover:bg-[#4338ca] text-white rounded-lg font-medium transition disabled:opacity-50"
+                  className="w-full py-3 px-4 bg-[#3B82F6] hover:bg-[#60A5FA] text-white rounded-md font-medium transition-all duration-150 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] disabled:opacity-50 active:scale-[0.98]"
                   disabled={loading}
                 >
-                  {loading ? 'Sending...' : 'Send Reset Link'}
+                  {loading ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Sending...
+                    </div>
+                  ) : 'Send Reset Link'}
                 </button>
               </form>
             </>

@@ -36,45 +36,45 @@ export function CreditIndicator({ credits, tier, planName }: CreditIndicatorProp
     <div className="relative">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-200 ${
+        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-150 ${
           isEmpty
-            ? 'bg-red-500/20 border border-red-500/30'
+            ? 'bg-[#EF4444]/[0.12] border border-[#EF4444]/[0.25]'
             : isLow
-            ? 'bg-amber-500/20 border border-amber-500/30'
+            ? 'bg-[#F59E0B]/[0.12] border border-[#F59E0B]/[0.25]'
             : tier === 'pro'
-            ? 'bg-gradient-to-r from-[#533afd]/20 to-[#15be53]/20 border border-[#533afd]/30'
-            : 'bg-[#f6f9fc] border border-[#e5edf5]'
+            ? 'bg-gradient-to-r from-[#3B82F6]/[0.15] to-[#00D26A]/[0.15] border border-[#3B82F6]/[0.25]'
+            : 'bg-[#1A1A24] border border-white/[0.06]'
         }`}
       >
         <div className="flex items-center gap-1.5">
           {primaryCredit?.unlimited ? (
             <>
-              <Zap className="w-3.5 h-3.5 text-[#15be53]" />
-              <span className="text-xs font-medium text-[#15be53]">Unlimited</span>
+              <Zap className="w-3.5 h-3.5 text-[#00D26A]" />
+              <span className="text-xs font-medium text-[#00D26A]">Unlimited</span>
             </>
           ) : (
             <>
-              <CreditCard className={`w-3.5 h-3.5 ${isLow ? 'text-amber-500' : 'text-[#64748d]'}`} />
-              <span className={`text-xs font-medium ${isLow ? 'text-amber-500' : 'text-[#061b31]'}`}>
+              <CreditCard className={`w-3.5 h-3.5 ${isLow ? 'text-[#F59E0B]' : 'text-[#5A5E66]'}`} />
+              <span className={`text-xs font-medium ${isLow ? 'text-[#F59E0B]' : 'text-[#E8E8ED]'}`}>
                 {primaryCredit?.remaining} left
               </span>
             </>
           )}
         </div>
-        <ChevronDown className={`w-3.5 h-3.5 text-[#64748d] transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-3.5 h-3.5 text-[#5A5E66] transition-transform duration-150 ${isExpanded ? 'rotate-180' : ''}`} />
       </button>
 
       {isExpanded && (
-        <div className="absolute right-0 top-full mt-2 w-72 bg-white border border-[#e5edf5] rounded-xl shadow-xl z-50 overflow-hidden animate-fade-in">
-          <div className="px-4 py-3 border-b border-[#e5edf5] flex items-center justify-between">
+        <div className="absolute right-0 top-full mt-2 w-72 bg-[#1A1A24] border border-white/[0.06] rounded-lg z-50 overflow-hidden animate-fade-in">
+          <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
             <div>
-              <span className="text-sm font-normal text-[#061b31]">{planName}</span>
-              <span className="text-xs text-[#64748d] ml-2">Plan</span>
+              <span className="text-sm font-medium text-[#E8E8ED]">{planName}</span>
+              <span className="text-xs text-[#5A5E66] ml-2">Plan</span>
             </div>
             <span className={`text-xs px-2 py-0.5 rounded-full ${
               tier === 'pro'
-                ? 'bg-[#533afd]/20 text-[#533afd]'
-                : 'bg-[#f6f9fc] text-[#64748d]'
+                ? 'bg-[#3B82F6]/[0.15] text-[#60A5FA]'
+                : 'bg-[#12121A] text-[#5A5E66]'
             }`}>
               {tier}
             </span>
@@ -83,29 +83,29 @@ export function CreditIndicator({ credits, tier, planName }: CreditIndicatorProp
           <div className="p-4 space-y-3">
             {credits.map((credit) => (
               <div key={credit.feature} className="flex items-center justify-between">
-                <span className="text-sm text-[#64748d]">{credit.display_name}</span>
+                <span className="text-sm text-[#8A8F98]">{credit.display_name}</span>
                 <div className="flex items-center gap-2">
                   {credit.unlimited ? (
-                    <span className="text-xs text-[#15be53] flex items-center gap-1">
+                    <span className="text-xs text-[#00D26A] flex items-center gap-1">
                       <Zap className="w-3 h-3" />
                       Unlimited
                     </span>
                   ) : (
                     <div className="flex items-center gap-1.5">
-                      <div className="w-16 h-1.5 bg-[#f6f9fc] rounded-full overflow-hidden">
+                      <div className="w-16 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full ${
                             credit.remaining / credit.total <= 0.2
-                              ? 'bg-[#ea2261]'
+                              ? 'bg-[#EF4444]'
                               : credit.remaining / credit.total <= 0.5
-                              ? 'bg-amber-500'
-                              : 'bg-[#15be53]'
+                              ? 'bg-[#F59E0B]'
+                              : 'bg-[#00D26A]'
                           }`}
                           style={{ width: `${(credit.remaining / credit.total) * 100}%` }}
                         />
                       </div>
                       <span className={`text-xs ${
-                        credit.remaining / credit.total <= 0.2 ? 'text-[#ea2261]' : 'text-[#64748d]'
+                        credit.remaining / credit.total <= 0.2 ? 'text-[#EF4444]' : 'text-[#8A8F98]'
                       }`}>
                         {credit.remaining}/{credit.total}
                       </span>
@@ -117,12 +117,12 @@ export function CreditIndicator({ credits, tier, planName }: CreditIndicatorProp
           </div>
 
           {isLow && (
-            <div className="px-4 py-3 bg-amber-500/10 border-t border-amber-500/20">
+            <div className="px-4 py-3 bg-[#F59E0B]/[0.06] border-t border-[#F59E0B]/[0.15]">
               <div className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                <AlertCircle className="w-4 h-4 text-[#F59E0B] mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-sm text-amber-600">Running low on credits</p>
-                  <a href="/pricing" className="text-xs text-amber-600/80 hover:text-amber-600 underline">
+                  <p className="text-sm text-[#F59E0B]">Running low on credits</p>
+                  <a href="/pricing" className="text-xs text-[#F59E0B]/80 hover:text-[#F59E0B] underline transition-colors duration-150">
                     Upgrade for more
                   </a>
                 </div>
@@ -131,10 +131,10 @@ export function CreditIndicator({ credits, tier, planName }: CreditIndicatorProp
           )}
 
           {tier !== 'pro' && tier !== 'team' && (
-            <div className="p-4 border-t border-[#e5edf5]">
+            <div className="p-4 border-t border-white/[0.06]">
               <a
                 href="/pricing"
-                className="block w-full py-2 text-center text-sm font-normal bg-[#533afd] hover:bg-[#4338ca] text-white rounded-lg transition-colors"
+                className="block w-full py-2 text-center text-sm font-medium bg-[#3B82F6] hover:bg-[#60A5FA] text-white rounded-md transition-all duration-150 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]"
               >
                 Upgrade to Pro
               </a>
@@ -148,14 +148,14 @@ export function CreditIndicator({ credits, tier, planName }: CreditIndicatorProp
 
 export function CreditBar({ credits }: { credits: Credit[] }) {
   return (
-    <div className="bg-white border border-[#e5edf5] rounded-xl p-6">
+    <div className="bg-[#1A1A24] border border-white/[0.06] rounded-lg p-6">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#533afd] to-[#15be53] flex items-center justify-center">
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#3B82F6] to-[#00D26A] flex items-center justify-center">
           <Sparkles className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h3 className="font-normal text-[#061b31]">Your Credits</h3>
-          <p className="text-sm text-[#64748d]">Track your monthly usage</p>
+          <h3 className="font-medium text-[#E8E8ED]">Your Credits</h3>
+          <p className="text-sm text-[#8A8F98]">Track your monthly usage</p>
         </div>
       </div>
 
@@ -163,15 +163,15 @@ export function CreditBar({ credits }: { credits: Credit[] }) {
         {credits.map((credit) => (
           <div key={credit.feature} className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-[#061b31]">{credit.display_name}</span>
+              <span className="text-sm text-[#E8E8ED]">{credit.display_name}</span>
               {credit.unlimited ? (
-                <span className="text-sm text-[#15be53] flex items-center gap-1">
+                <span className="text-sm text-[#00D26A] flex items-center gap-1">
                   <Zap className="w-3.5 h-3.5" />
                   Unlimited
                 </span>
               ) : (
                 <span className={`text-sm ${
-                  credit.remaining / credit.total <= 0.2 ? 'text-[#ea2261]' : 'text-[#64748d]'
+                  credit.remaining / credit.total <= 0.2 ? 'text-[#EF4444]' : 'text-[#8A8F98]'
                 }`}>
                   {credit.remaining} of {credit.total} remaining
                 </span>
@@ -179,14 +179,14 @@ export function CreditBar({ credits }: { credits: Credit[] }) {
             </div>
 
             {!credit.unlimited && (
-              <div className="w-full h-2 bg-[#f6f9fc] rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-white/[0.06] rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${
                     credit.remaining / credit.total <= 0.2
-                      ? 'bg-[#ea2261]'
+                      ? 'bg-[#EF4444]'
                       : credit.remaining / credit.total <= 0.5
-                      ? 'bg-amber-500'
-                      : 'bg-[#15be53]'
+                      ? 'bg-[#F59E0B]'
+                      : 'bg-[#00D26A]'
                   }`}
                   style={{ width: `${(credit.used / credit.total) * 100}%` }}
                 />
