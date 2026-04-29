@@ -17,7 +17,7 @@ function extractError(data: any): string {
   return JSON.stringify(data);
 }
 
-async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 15000) {
+async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 15000, retry = true): Promise<Response> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -26,6 +26,11 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutM
   } catch (err: any) {
     if (err.name === 'AbortError') {
       throw new Error('Request timed out. The server may be down.');
+    }
+    // Retry once on network errors (not 4xx/5xx — those return a Response)
+    if (retry) {
+      await new Promise(r => setTimeout(r, 1000));
+      return fetchWithTimeout(url, options, timeoutMs, false);
     }
     throw new Error('Network error. Please check your connection.');
   } finally {
@@ -37,8 +42,17 @@ async function handleResponse(res: Response) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     const msg = extractError(data);
+    if (res.status === 401) {
+      throw new Error('Session expired. Please log in again.');
+    }
+    if (res.status === 429) {
+      throw new Error('Too many requests. Please wait a moment and try again.');
+    }
     if (res.status === 404 && msg.includes('Application not found')) {
       throw new Error('Backend server is unavailable. Please try again later.');
+    }
+    if (res.status >= 500) {
+      throw new Error('Server error. Please try again in a moment.');
     }
     throw new Error(msg || `HTTP ${res.status}`);
   }

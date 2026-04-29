@@ -1,5 +1,6 @@
 import './globals.css'
 import { SubscriptionProvider } from '@/lib/subscription-context'
+import NetworkStatusBanner from '@/components/NetworkStatusBanner'
 
 export const metadata = {
   metadataBase: new URL('https://hunt-x.app'),
@@ -38,6 +39,7 @@ export default function RootLayout({
       <body className="bg-[#0B0B0F] text-[#E8E8ED] antialiased min-h-screen"
         style={{ fontFamily: 'Inter, -apple-system, system-ui, Segoe UI, Roboto, sans-serif' }}
       >
+        <NetworkStatusBanner />
         <SubscriptionProvider>
           {children}
         </SubscriptionProvider>
