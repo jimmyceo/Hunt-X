@@ -519,6 +519,16 @@ export const apiClient = {
     return handleResponse(res);
   },
 
+  // ============ RESUME ROASTER ============
+  async roastResume(resumeId: string, tone: string = 'gentle') {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/roaster/`, {
+      method: 'POST',
+      headers: jsonHeaders(),
+      body: JSON.stringify({ resume_id: resumeId, tone }),
+    });
+    return handleResponse(res);
+  },
+
   // ============ GOOGLE OAUTH ============
   async googleLogin(idToken: string) {
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/auth/google`, {

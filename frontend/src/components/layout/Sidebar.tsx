@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Bot,
   UserCircle,
+  Flame,
 } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import { useSubscription } from '@/lib/subscription-context';
@@ -27,6 +28,7 @@ const navItems = [
   { label: 'CV Generator', href: '/generate', icon: FilePlus },
   { label: 'Cover Letters', href: '/cover-letters', icon: Mail },
   { label: 'Interview Prep', href: '/interview', icon: MessagesSquare },
+  { label: 'Resume Roaster', href: '/roaster', icon: Flame },
   { label: 'AI Career Coach', href: '/chat', icon: Bot },
   { label: 'Application Tracker', href: '/applications', icon: Kanban },
   { label: 'My Documents', href: '/documents', icon: FileText },
