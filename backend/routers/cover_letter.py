@@ -114,6 +114,24 @@ async def list_cover_letters(
     ]
 
 
+@router.delete("/{cover_id}")
+async def delete_cover_letter(
+    cover_id: str,
+    user=Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Delete a cover letter"""
+    letter = db.query(CoverLetterModel).filter(
+        CoverLetterModel.id == cover_id,
+        CoverLetterModel.user_id == user.id
+    ).first()
+    if not letter:
+        raise HTTPException(status_code=404, detail="Cover letter not found")
+    db.delete(letter)
+    db.commit()
+    return {"status": "deleted"}
+
+
 @router.get("/{cover_id}/download")
 async def download_cover_letter(
     cover_id: str,

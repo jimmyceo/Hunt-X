@@ -257,6 +257,24 @@ async def get_prep_by_evaluation(
     )
 
 
+@router.delete("/{prep_id}")
+async def delete_interview_prep(
+    prep_id: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Delete interview preparation"""
+    prep = db.query(InterviewPrepModel).filter(
+        InterviewPrepModel.id == prep_id,
+        InterviewPrepModel.user_id == user.id
+    ).first()
+    if not prep:
+        raise HTTPException(status_code=404, detail="Interview prep not found")
+    db.delete(prep)
+    db.commit()
+    return {"status": "deleted"}
+
+
 @router.get("/")
 async def list_interview_preps(
     user: User = Depends(get_current_user),

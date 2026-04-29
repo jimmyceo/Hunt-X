@@ -157,6 +157,28 @@ async def list_cvs(
     ]
 
 
+@router.delete("/{cv_id}")
+async def delete_cv(
+    cv_id: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Delete a CV"""
+
+    cv = db.query(CVModel).filter(
+        CVModel.id == cv_id,
+        CVModel.user_id == user.id
+    ).first()
+
+    if not cv:
+        raise HTTPException(status_code=404, detail="CV not found")
+
+    db.delete(cv)
+    db.commit()
+
+    return {"status": "deleted"}
+
+
 @router.get("/{cv_id}/download")
 async def download_cv(
     cv_id: str,
