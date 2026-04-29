@@ -19,10 +19,10 @@ router = APIRouter(prefix="/api/evaluate", tags=["evaluation"])
 
 class CreateEvaluationRequest(BaseModel):
     resume_id: str
-    job_description: str
-    company: str
-    job_title: str
-    job_url: Optional[str] = None
+    job_description: str = Field(..., max_length=50000)
+    company: str = Field(..., max_length=255)
+    job_title: str = Field(..., max_length=255)
+    job_url: Optional[str] = Field(None, max_length=2048)
 
 
 class MatchItem(BaseModel):

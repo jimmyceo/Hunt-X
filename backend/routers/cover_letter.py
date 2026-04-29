@@ -3,7 +3,7 @@ Cover letter API endpoints
 """
 
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api/cover-letter", tags=["cover-letter"])
 
 class GenerateCoverLetterRequest(BaseModel):
     evaluation_id: str
-    hiring_manager_name: Optional[str] = None
+    hiring_manager_name: Optional[str] = Field(None, max_length=255)
     short_version: bool = False
 
 

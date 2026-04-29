@@ -4,7 +4,7 @@ WebSocket or REST for real-time application assistance
 """
 
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
@@ -28,7 +28,7 @@ class ChatMessageResponse(BaseModel):
 
 
 class AskQuestionRequest(BaseModel):
-    question: str
+    question: str = Field(..., max_length=10000)
 
 
 class ChatSessionResponse(BaseModel):

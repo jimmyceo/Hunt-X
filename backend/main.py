@@ -80,6 +80,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Body size limit middleware (10MB)
+MAX_BODY_SIZE = 10 * 1024 * 1024
+
+class BodySizeLimitMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        content_length = request.headers.get("content-length")
+        if content_length and int(content_length) > MAX_BODY_SIZE:
+            return JSONResponse(
+                status_code=413,
+                content={"detail": "Request body too large. Maximum size is 10MB."}
+            )
+        return await call_next(request)
+
+app.add_middleware(BodySizeLimitMiddleware)
+
 # Request logging middleware
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):

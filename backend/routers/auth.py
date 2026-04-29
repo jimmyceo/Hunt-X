@@ -6,7 +6,19 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from limiter import limiter
 from fastapi.security import HTTPBearer
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, validator
+
+
+def validate_password_strength(password: str) -> str:
+    if len(password) < 8:
+        raise ValueError('Password must be at least 8 characters')
+    if not any(c.isupper() for c in password):
+        raise ValueError('Password must contain at least one uppercase letter')
+    if not any(c.islower() for c in password):
+        raise ValueError('Password must contain at least one lowercase letter')
+    if not any(c.isdigit() for c in password):
+        raise ValueError('Password must contain at least one digit')
+    return password
 from sqlalchemy.orm import Session
 from typing import Optional
 from datetime import datetime, timedelta
@@ -45,6 +57,8 @@ class UserRegister(BaseModel):
     password: str
     name: Optional[str] = None
 
+    _validate_password = validator('password', allow_reuse=True)(validate_password_strength)
+
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -75,10 +89,14 @@ class ChangePasswordRequest(BaseModel):
     current_password: str
     new_password: str
 
+    _validate_password = validator('new_password', allow_reuse=True)(validate_password_strength)
+
 
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
+
+    _validate_password = validator('new_password', allow_reuse=True)(validate_password_strength)
 
 
 class PasswordResetResponse(BaseModel):
