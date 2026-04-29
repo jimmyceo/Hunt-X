@@ -372,6 +372,10 @@ class AIClient:
         """
         return ai_query_json(prompt, system, user_id, max_tokens)
 
+    # Aliases for backward compatibility with services using generate/generate_json
+    generate = query
+    generate_json = query_json
+
 
 if __name__ == "__main__":
     # Test imports and basic functionality
