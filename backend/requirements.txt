@@ -25,5 +25,8 @@ apify-client==1.6.0
 # HTTP client for APIs
 httpx==0.25.2
 
+# Rate limiting
+slowapi==0.1.9
+
 # Validation
 pydantic-settings==2.1.0

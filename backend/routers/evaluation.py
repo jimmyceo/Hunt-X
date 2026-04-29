@@ -2,7 +2,8 @@
 Evaluation router
 """
 
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
+from limiter import limiter
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from typing import Optional, List
@@ -127,8 +128,10 @@ class EvaluationListItem(BaseModel):
 
 
 @router.post("/", response_model=EvaluationResponse)
+@limiter.limit("20/hour")
 async def create_evaluation(
-    request: CreateEvaluationRequest,
+    request: Request,
+    request_data: CreateEvaluationRequest,
     background_tasks: BackgroundTasks,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -141,7 +144,7 @@ async def create_evaluation(
 
     # Get resume
     resume = db.query(Resume).filter(
-        Resume.id == request.resume_id,
+        Resume.id == request_data.resume_id,
         Resume.user_id == user.id
     ).first()
 
@@ -162,7 +165,7 @@ async def create_evaluation(
     try:
         result = await eval_service.evaluate(
             cv_text=resume.raw_text,
-            job_description=request.job_description,
+            job_description=request_data.job_description,
             target_archetypes=user.preferred_archetypes
         )
     except Exception as e:
@@ -174,11 +177,11 @@ async def create_evaluation(
     # Save to database
     evaluation = Evaluation(
         user_id=user.id,
-        resume_id=request.resume_id,
-        company=request.company,
-        role=request.job_title,
-        job_description=request.job_description,
-        job_url=request.job_url,
+        resume_id=request_data.resume_id,
+        company=request_data.company,
+        role=request_data.job_title,
+        job_description=request_data.job_description,
+        job_url=request_data.job_url,
         archetype=result.block_a.archetype,
         domain=result.block_a.domain,
         seniority=result.block_a.seniority,

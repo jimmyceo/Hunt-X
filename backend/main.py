@@ -3,14 +3,20 @@ Hunt-X API - Main Application
 Career-ops ported to SaaS
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pathlib import Path
 import os
 
 # Load environment variables before other imports
 from dotenv import load_dotenv
 load_dotenv()
+
+# Rate limiting
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from limiter import limiter
 
 # Import models and initialize
 from models import engine, Base
@@ -44,6 +50,8 @@ app = FastAPI(
     description="AI-powered job search platform",
     version="0.2.0"
 )
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS middleware - configurable origins for security
 _cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")

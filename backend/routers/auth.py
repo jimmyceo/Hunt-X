@@ -2,7 +2,8 @@
 Authentication router
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
+from limiter import limiter
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
@@ -85,7 +86,9 @@ class PasswordResetResponse(BaseModel):
 
 
 @router.post("/register", response_model=TokenResponse)
+@limiter.limit("5/minute")
 async def register(
+    request: Request,
     user_data: UserRegister,
     db: Session = Depends(get_db)
 ):
@@ -146,7 +149,9 @@ async def register(
 
 
 @router.post("/login", response_model=TokenResponse)
+@limiter.limit("10/minute")
 async def login(
+    request: Request,
     credentials: UserLogin,
     db: Session = Depends(get_db)
 ):
@@ -272,12 +277,14 @@ async def resend_verification(
 
 
 @router.post("/forgot-password", response_model=PasswordResetResponse)
+@limiter.limit("3/hour")
 async def forgot_password(
-    request: ForgotPasswordRequest,
+    request: Request,
+    request_data: ForgotPasswordRequest,
     db: Session = Depends(get_db)
 ):
     """Request password reset token"""
-    user = db.query(User).filter(User.email == request.email).first()
+    user = db.query(User).filter(User.email == request_data.email).first()
     if not user:
         # Don't reveal if email exists
         return PasswordResetResponse(

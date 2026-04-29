@@ -2,7 +2,8 @@
 CV router
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from limiter import limiter
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from typing import Optional, List
@@ -31,8 +32,10 @@ class CVResponse(BaseModel):
 
 
 @router.post("/generate", response_model=CVResponse)
+@limiter.limit("20/hour")
 async def generate_cv(
-    request: GenerateCVRequest,
+    request: Request,
+    request_data: GenerateCVRequest,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
     cv_service: CVService = Depends(get_cv_service)
@@ -43,7 +46,7 @@ async def generate_cv(
 
     # Get evaluation
     evaluation = db.query(Evaluation).filter(
-        Evaluation.id == request.evaluation_id,
+        Evaluation.id == request_data.evaluation_id,
         Evaluation.user_id == user.id
     ).first()
 

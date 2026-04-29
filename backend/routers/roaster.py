@@ -2,7 +2,8 @@
 Resume Roaster router
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
+from limiter import limiter
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -26,8 +27,10 @@ class RoastResponse(BaseModel):
 
 
 @router.post("/", response_model=RoastResponse)
+@limiter.limit("20/hour")
 async def roast_resume(
-    request: RoastRequest,
+    request: Request,
+    request_data: RoastRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -38,7 +41,7 @@ async def roast_resume(
 
     # Get resume
     resume = db.query(Resume).filter(
-        Resume.id == request.resume_id,
+        Resume.id == request_data.resume_id,
         Resume.user_id == current_user.id
     ).first()
 
@@ -50,7 +53,7 @@ async def roast_resume(
 
     # Roast it
     service = RoasterService(AIClient())
-    result = await service.roast(resume.raw_text, tone=request.tone)
+    result = await service.roast(resume.raw_text, tone=request_data.tone)
 
     return RoastResponse(
         overall_score=result.overall_score,
