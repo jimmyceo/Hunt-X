@@ -14,6 +14,14 @@ import {
   Activity,
 } from 'lucide-react'
 
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Hunt-X — Autonomous AI Career Agent',
+  description: 'Upload your resume. Let AI find, analyze, and apply to jobs for you. ATS-optimized CVs, cover letters, interview prep, and real-time job discovery.',
+  alternates: { canonical: 'https://hunt-x.app/' },
+}
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#0B0B0F] text-[#E8E8ED]">
