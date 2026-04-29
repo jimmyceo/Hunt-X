@@ -519,6 +519,18 @@ export const apiClient = {
     return handleResponse(res);
   },
 
+  // ============ GOOGLE OAUTH ============
+  async googleLogin(idToken: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/auth/google`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_token: idToken }),
+    });
+    const data = await handleResponse(res);
+    if (data.access_token) setAuthToken(data.access_token);
+    return data;
+  },
+
   // ============ LEGACY COMPATIBILITY ============
   async checkPaymentStatus(email: string) {
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/payment/v2/status/${email}`, {

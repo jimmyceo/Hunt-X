@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { Eye, EyeOff, Sparkles, Check, X, ArrowRight } from 'lucide-react';
 import { apiClient, setAuthToken } from '@/lib/api';
@@ -17,6 +17,14 @@ function getPasswordStrength(password: string): { score: number; label: string; 
   return { score, label: labels[Math.min(score, 3)], color: colors[Math.min(score, 3)] };
 }
 
+declare global {
+  interface Window {
+    google?: any;
+  }
+}
+
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState('');
@@ -25,10 +33,71 @@ export default function AuthPage() {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [rememberMe, setRememberMe] = useState(false);
+  const googleBtnRef = useRef<HTMLDivElement>(null);
 
   const strength = useMemo(() => getPasswordStrength(password), [password]);
+
+  // Load Google Identity Services
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) return;
+    if (typeof window === 'undefined') return;
+    if (document.getElementById('google-identity-script')) return;
+
+    const script = document.createElement('script');
+    script.id = 'google-identity-script';
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      if (window.google && googleBtnRef.current) {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+        });
+        window.google.accounts.id.renderButton(googleBtnRef.current, {
+          theme: 'filled_black',
+          size: 'large',
+          width: googleBtnRef.current.offsetWidth || 360,
+          text: 'continue_with',
+          shape: 'rectangular',
+          logo_alignment: 'center',
+        });
+      }
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      const s = document.getElementById('google-identity-script');
+      if (s) s.remove();
+    };
+  }, [isLogin]);
+
+  const handleGoogleCredentialResponse = useCallback(async (response: any) => {
+    if (!response.credential) {
+      setError('Google sign-in was cancelled or failed');
+      return;
+    }
+    setGoogleLoading(true);
+    setError('');
+    try {
+      const data = await apiClient.googleLogin(response.credential);
+      if (data.access_token) {
+        setAuthToken(data.access_token);
+        window.location.href = '/upload';
+      } else {
+        setError('Unexpected response from server');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Google sign-in failed');
+    } finally {
+      setGoogleLoading(false);
+    }
+  }, []);
 
   const validate = () => {
     const errs: string[] = [];
@@ -88,18 +157,15 @@ export default function AuthPage() {
     <div className="min-h-screen flex bg-[#0B0B0F]">
       {/* Left Panel */}
       <div className="hidden lg:flex lg:w-[45%] bg-[#12121A] relative flex-col justify-between p-12 text-white overflow-hidden border-r border-white/[0.06]">
-        {/* Decorative gradient shapes */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#3B82F6] rounded-full blur-[120px] opacity-10 -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#3B82F6] rounded-full blur-[100px] opacity-5 translate-y-1/3 -translate-x-1/4" />
 
-        {/* Top Logo */}
         <div className="relative z-10">
           <Link href="/" className="text-2xl font-medium tracking-tight text-[#E8E8ED]">
             Hunt-X
           </Link>
         </div>
 
-        {/* Center Content */}
         <div className="relative z-10 flex-1 flex flex-col justify-center">
           <h2 className="text-5xl font-medium tracking-tight mb-4 text-[#E8E8ED]" style={{ letterSpacing: '-0.96px', lineHeight: 1.0 }}>
             {isLogin ? 'Welcome Back.' : 'Start Here.'}
@@ -108,7 +174,6 @@ export default function AuthPage() {
             Your autonomous career agent is ready.
           </p>
 
-          {/* AI Activity Indicator */}
           <div className="flex items-center gap-2 mb-8">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#3B82F6] opacity-75" />
@@ -117,7 +182,6 @@ export default function AuthPage() {
             <span className="text-xs text-[#60A5FA] font-mono">AGENT ACTIVE — SCANNING 12,421 JOBS</span>
           </div>
 
-          {/* Testimonial */}
           <div className="border-l-2 border-[#3B82F6] pl-6">
             <p className="text-sm italic text-[#8A8F98] leading-relaxed mb-3">
               "Hunt-X helped me land 3 interviews in my first week. The AI-generated CVs are incredible."
@@ -128,7 +192,6 @@ export default function AuthPage() {
           </div>
         </div>
 
-        {/* Bottom */}
         <div className="relative z-10">
           <div className="flex items-center gap-2 text-xs text-[#5A5E66]">
             <Sparkles className="w-3.5 h-3.5" />
@@ -140,7 +203,6 @@ export default function AuthPage() {
       {/* Right Panel */}
       <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
         <div className="w-full max-w-md">
-          {/* Mobile logo */}
           <div className="lg:hidden text-center mb-8">
             <Link href="/" className="text-2xl font-medium tracking-tight text-[#E8E8ED]">
               Hunt-X
@@ -174,6 +236,18 @@ export default function AuthPage() {
               <div className="mb-4 p-4 rounded-md bg-[#EF4444]/10 border border-[#EF4444]/20 text-[#EF4444] text-sm">
                 {error}
               </div>
+            )}
+
+            {/* Google Sign In */}
+            {GOOGLE_CLIENT_ID && (
+              <>
+                <div ref={googleBtnRef} className="w-full mb-4" />
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex-1 h-px bg-white/[0.06]" />
+                  <span className="text-xs text-[#5A5E66]">or</span>
+                  <div className="flex-1 h-px bg-white/[0.06]" />
+                </div>
+              </>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -231,7 +305,6 @@ export default function AuthPage() {
                   </button>
                 </div>
 
-                {/* Remember Me */}
                 {isLogin && (
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -244,7 +317,6 @@ export default function AuthPage() {
                   </label>
                 )}
 
-                {/* Password Strength */}
                 {!isLogin && password.length > 0 && (
                   <div className="mt-2">
                     <div className="flex items-center gap-2 mb-1">

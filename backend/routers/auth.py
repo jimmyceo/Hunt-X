@@ -9,6 +9,11 @@ from sqlalchemy.orm import Session
 from typing import Optional
 from datetime import datetime, timedelta
 import secrets
+import os
+import httpx
+
+router = APIRouter(prefix="/api/auth", tags=["auth"])
+security = HTTPBearer()
 
 from models import get_db, User
 from dependencies import (
@@ -19,8 +24,9 @@ from dependencies import (
 )
 from services.email_service import email_service
 
-router = APIRouter(prefix="/api/auth", tags=["auth"])
-security = HTTPBearer()
+
+class GoogleAuthRequest(BaseModel):
+    id_token: str
 
 
 class VerifyEmailRequest(BaseModel):
@@ -355,3 +361,97 @@ async def refresh_token(
     """Refresh access token"""
     token = create_access_token({"sub": str(current_user.id)})
     return {"access_token": token, "token_type": "bearer"}
+
+
+async def _verify_google_id_token(id_token: str) -> dict:
+    """Verify a Google ID token and return the payload."""
+    from jose import jwt as jose_jwt
+    from jose.exceptions import JWTError
+
+    # Fetch Google's public keys
+    async with httpx.AsyncClient() as client:
+        resp = await client.get("https://www.googleapis.com/oauth2/v3/certs")
+        resp.raise_for_status()
+        certs = resp.json()
+
+    # Try each key
+    for key in certs.get("keys", []):
+        try:
+            payload = jose_jwt.decode(
+                id_token,
+                key,
+                algorithms=["RS256"],
+                audience=os.getenv("GOOGLE_CLIENT_ID", ""),
+                issuer=["https://accounts.google.com", "accounts.google.com"]
+            )
+            return payload
+        except JWTError:
+            continue
+
+    raise HTTPException(status_code=400, detail="Invalid Google ID token")
+
+
+@router.post("/google", response_model=TokenResponse)
+async def google_auth(
+    request: GoogleAuthRequest,
+    db: Session = Depends(get_db)
+):
+    """Authenticate with Google ID token. Creates or links user account."""
+    try:
+        payload = await _verify_google_id_token(request.id_token)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Token verification failed: {str(e)}")
+
+    google_id = payload.get("sub")
+    email = payload.get("email")
+    name = payload.get("name") or payload.get("given_name", "")
+
+    if not google_id or not email:
+        raise HTTPException(status_code=400, detail="Invalid token: missing email or sub")
+
+    # Find existing user by google_id or email
+    user = db.query(User).filter(
+        (User.google_id == google_id) | (User.email == email)
+    ).first()
+
+    if user:
+        # Link google_id if not already linked
+        if not user.google_id:
+            user.google_id = google_id
+            db.commit()
+            db.refresh(user)
+        # Update name if empty
+        if not user.name and name:
+            user.name = name
+            db.commit()
+    else:
+        # Create new user
+        import secrets
+        random_password = secrets.token_urlsafe(32)
+        user = User(
+            email=email,
+            password_hash=get_password_hash(random_password),
+            name=name,
+            google_id=google_id,
+            tier="free",
+            jobs_remaining=5,
+            email_verified=True
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    token = create_access_token({"sub": str(user.id)})
+    return TokenResponse(
+        access_token=token,
+        user=UserResponse(
+            id=str(user.id),
+            email=user.email,
+            name=user.name,
+            tier=user.tier,
+            jobs_remaining=user.jobs_remaining,
+            email_verified=user.email_verified
+        )
+    )
