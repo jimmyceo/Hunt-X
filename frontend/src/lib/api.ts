@@ -470,6 +470,55 @@ export const apiClient = {
     return handleResponse(res);
   },
 
+  // ============ PROFILES ============
+  async listProfiles() {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/profiles/`, {
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  async createProfile(data: { name: string; target_roles?: string[]; preferred_location?: string; min_salary?: number; remote_preference?: string; primary_resume_id?: string }) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/profiles/`, {
+      method: 'POST',
+      headers: jsonHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(res);
+  },
+
+  async getProfile(profileId: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/profiles/${profileId}`, {
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  async updateJobProfile(profileId: string, data: Partial<{ name: string; target_roles: string[]; preferred_location: string; min_salary: number; remote_preference: string; primary_resume_id: string }>) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/profiles/${profileId}`, {
+      method: 'PUT',
+      headers: jsonHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(res);
+  },
+
+  async deleteProfile(profileId: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/profiles/${profileId}`, {
+      method: 'DELETE',
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  async setDefaultProfile(profileId: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/profiles/${profileId}/set-default`, {
+      method: 'POST',
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
   // ============ LEGACY COMPATIBILITY ============
   async checkPaymentStatus(email: string) {
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/payment/v2/status/${email}`, {

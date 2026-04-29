@@ -15,6 +15,7 @@ import {
   X,
   ChevronRight,
   Bot,
+  UserCircle,
 } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import { useSubscription } from '@/lib/subscription-context';
@@ -29,6 +30,7 @@ const navItems = [
   { label: 'AI Career Coach', href: '/chat', icon: Bot },
   { label: 'Application Tracker', href: '/applications', icon: Kanban },
   { label: 'My Documents', href: '/documents', icon: FileText },
+  { label: 'Profiles', href: '/profile', icon: UserCircle },
   { label: 'Settings', href: '/settings', icon: Settings },
 ];
 

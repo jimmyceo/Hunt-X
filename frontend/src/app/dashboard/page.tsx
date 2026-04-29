@@ -1,62 +1,95 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { apiClient } from '@/lib/api'
-import Sidebar from '@/components/layout/Sidebar'
-import { FileText, FilePlus, Mic, ArrowRight, Download, Sparkles } from 'lucide-react'
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { apiClient } from '@/lib/api';
+import Sidebar from '@/components/layout/Sidebar';
+import { FileText, FilePlus, Mic, ArrowRight, Download, Sparkles, Briefcase, Star, ChevronRight, Kanban } from 'lucide-react';
 
 interface CV {
-  id: string
-  job_title: string
-  company: string
-  created_at: string
-  ats_score?: number
+  id: string;
+  job_title: string;
+  company: string;
+  created_at: string;
+  ats_score?: number;
 }
 
 interface Resume {
-  id: string
-  original_filename: string
-  skills: string[]
-  created_at: string
+  id: string;
+  original_filename: string;
+  skills: string[];
+  created_at: string;
+}
+
+interface Profile {
+  id: string;
+  name: string;
+  target_roles: string[];
+  is_default: boolean;
+  primary_resume_id: string | null;
+}
+
+interface TrackerSummary {
+  total: number;
+  active: number;
+  interviews: number;
+  offers: number;
 }
 
 export default function Dashboard() {
-  const [cvs, setCvs] = useState<CV[]>([])
-  const [resumes, setResumes] = useState<Resume[]>([])
-  const [user, setUser] = useState<{ name?: string; email: string; tier: string; jobs_remaining: number } | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [cvs, setCvs] = useState<CV[]>([]);
+  const [resumes, setResumes] = useState<Resume[]>([]);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [trackerSummary, setTrackerSummary] = useState<TrackerSummary | null>(null);
+  const [user, setUser] = useState<{ name?: string; email: string; tier: string; jobs_remaining: number } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    loadData()
-  }, [])
+    loadData();
+  }, []);
 
   const loadData = async () => {
-    setLoading(true)
-    setError('')
+    setLoading(true);
+    setError('');
     try {
-      const [userRes, cvsRes, resumesRes] = await Promise.allSettled([
+      const [userRes, cvsRes, resumesRes, profilesRes, appsRes] = await Promise.allSettled([
         apiClient.getCurrentUser(),
         apiClient.listCVs().catch(() => []),
         apiClient.listResumes().catch(() => []),
-      ])
+        apiClient.listProfiles().catch(() => ({ profiles: [] })),
+        apiClient.listApplications().catch(() => ({ applications: [] })),
+      ]);
 
       if (userRes.status === 'fulfilled') {
-        setUser(userRes.value)
+        setUser(userRes.value);
       }
       if (cvsRes.status === 'fulfilled' && Array.isArray(cvsRes.value)) {
-        setCvs(cvsRes.value)
+        setCvs(cvsRes.value);
       }
       if (resumesRes.status === 'fulfilled' && Array.isArray(resumesRes.value)) {
-        setResumes(resumesRes.value)
+        setResumes(resumesRes.value);
+      }
+      if (profilesRes.status === 'fulfilled') {
+        setProfiles(profilesRes.value?.profiles || []);
+      }
+      if (appsRes.status === 'fulfilled') {
+        const apps = appsRes.value?.applications || [];
+        setTrackerSummary({
+          total: apps.length,
+          active: apps.filter((a: any) => a.stage !== 'rejected' && a.stage !== 'offer').length,
+          interviews: apps.filter((a: any) => a.stage === 'interview').length,
+          offers: apps.filter((a: any) => a.stage === 'offer').length,
+        });
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to load dashboard data')
+      setError(err.message || 'Failed to load dashboard data');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
+  const defaultProfile = profiles.find((p) => p.is_default) || profiles[0];
 
   if (loading) {
     return (
@@ -69,7 +102,7 @@ export default function Dashboard() {
           </div>
         </main>
       </div>
-    )
+    );
   }
 
   return (
@@ -101,6 +134,56 @@ export default function Dashboard() {
             </div>
           )}
 
+          {/* Profile Card */}
+          {defaultProfile && (
+            <div className="mb-6 p-4 bg-[#1A1A24] rounded-lg border border-white/[0.06] flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#3B82F6]/10 flex items-center justify-center">
+                  <Star className="w-5 h-5 text-[#3B82F6]" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-[#E8E8ED]">{defaultProfile.name}</span>
+                    <span className="text-[10px] px-1.5 py-0.5 bg-[#3B82F6]/[0.15] text-[#60A5FA] rounded-full border border-[#3B82F6]/[0.25]">Default</span>
+                  </div>
+                  {defaultProfile.target_roles?.length > 0 && (
+                    <p className="text-xs text-[#8A8F98] mt-0.5">
+                      Targeting: {defaultProfile.target_roles.join(', ')}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <Link
+                href="/profile"
+                className="text-xs text-[#60A5FA] hover:text-[#3B82F6] flex items-center gap-1 transition-colors duration-150 shrink-0"
+              >
+                Manage Profiles <ChevronRight className="w-3 h-3" />
+              </Link>
+            </div>
+          )}
+
+          {/* Tracker Summary */}
+          {trackerSummary && trackerSummary.total > 0 && (
+            <div className="mb-6 grid grid-cols-4 gap-3">
+              <Link href="/applications" className="p-3 bg-[#1A1A24] rounded-lg border border-white/[0.06] hover:border-white/[0.10] transition-colors">
+                <div className="text-xl font-medium text-[#E8E8ED]">{trackerSummary.total}</div>
+                <div className="text-xs text-[#5A5E66] mt-0.5">Applications</div>
+              </Link>
+              <Link href="/applications" className="p-3 bg-[#1A1A24] rounded-lg border border-white/[0.06] hover:border-white/[0.10] transition-colors">
+                <div className="text-xl font-medium text-[#3B82F6]">{trackerSummary.active}</div>
+                <div className="text-xs text-[#5A5E66] mt-0.5">Active</div>
+              </Link>
+              <Link href="/applications" className="p-3 bg-[#1A1A24] rounded-lg border border-white/[0.06] hover:border-white/[0.10] transition-colors">
+                <div className="text-xl font-medium text-[#F59E0B]">{trackerSummary.interviews}</div>
+                <div className="text-xs text-[#5A5E66] mt-0.5">Interviews</div>
+              </Link>
+              <Link href="/applications" className="p-3 bg-[#1A1A24] rounded-lg border border-white/[0.06] hover:border-white/[0.10] transition-colors">
+                <div className="text-xl font-medium text-[#00D26A]">{trackerSummary.offers}</div>
+                <div className="text-xs text-[#5A5E66] mt-0.5">Offers</div>
+              </Link>
+            </div>
+          )}
+
           {/* Stats */}
           <div className="grid md:grid-cols-4 gap-4 mb-8">
             <div className="p-5 bg-[#1A1A24] rounded-lg border border-white/[0.06]">
@@ -116,7 +199,7 @@ export default function Dashboard() {
               <div className="text-[#5A5E66] text-sm mt-1">Jobs Remaining</div>
             </div>
             <div className="p-5 bg-[#1A1A24] rounded-lg border border-white/[0.06]">
-              <div className="text-3xl font-medium text-[#00D26A]">0</div>
+              <div className="text-3xl font-medium text-[#00D26A]">{trackerSummary?.total ?? 0}</div>
               <div className="text-[#5A5E66] text-sm mt-1">Applications</div>
             </div>
           </div>
@@ -228,5 +311,5 @@ export default function Dashboard() {
         </div>
       </main>
     </div>
-  )
+  );
 }

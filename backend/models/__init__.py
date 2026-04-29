@@ -15,6 +15,7 @@ from models.subscription import UserSubscription, SubscriptionPlan, Subscription
 
 from models.feedback import Feedback
 from models.application import Application
+from models.profile import Profile
 
 __all__ = [
     "Base",
@@ -36,5 +37,6 @@ __all__ = [
     "CreditBalance",
     "UsageLog",
     "Feedback",
-    "Application"
+    "Application",
+    "Profile"
 ]
