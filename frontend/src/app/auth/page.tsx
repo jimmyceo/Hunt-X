@@ -62,7 +62,11 @@ export default function AuthPage() {
 
       if (data.access_token) {
         setAuthToken(data.access_token);
-        window.location.href = '/upload';
+        if (data.user?.email_verified === false) {
+          window.location.href = '/auth/verify';
+        } else {
+          window.location.href = '/upload';
+        }
       } else {
         setError('Unexpected response from server');
       }

@@ -2,7 +2,7 @@
 User model
 """
 
-from sqlalchemy import Column, String, Integer, DateTime, JSON
+from sqlalchemy import Column, String, Integer, DateTime, JSON, Boolean
 from sqlalchemy.orm import relationship
 
 from models.base import BaseModel
@@ -31,6 +31,11 @@ class User(BaseModel):
     tier = Column(String(50), default="try")  # try, active, aggressive, unlimited
     jobs_remaining = Column(Integer, default=5)
     jobs_reset_date = Column(DateTime)
+
+    # Email verification
+    email_verified = Column(Boolean, default=False)
+    verification_code = Column(String(10), unique=True, nullable=True, index=True)
+    verification_expires = Column(DateTime)
 
     # Password reset
     reset_token = Column(String(255), unique=True, nullable=True, index=True)

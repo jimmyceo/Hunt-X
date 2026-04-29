@@ -101,6 +101,23 @@ export const apiClient = {
     return handleResponse(res);
   },
 
+  async verifyEmail(code: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/auth/verify-email`, {
+      method: 'POST',
+      headers: jsonHeaders(),
+      body: JSON.stringify({ code }),
+    });
+    return handleResponse(res);
+  },
+
+  async resendVerification() {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/auth/resend-verification`, {
+      method: 'POST',
+      headers: jsonHeaders(),
+    });
+    return handleResponse(res);
+  },
+
   // ============ RESUME ============
   async uploadResume(file: File, email: string) {
     const formData = new FormData();

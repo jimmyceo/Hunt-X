@@ -17,9 +17,19 @@ from dependencies import (
     create_access_token,
     get_current_user
 )
+from services.email_service import email_service
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 security = HTTPBearer()
+
+
+class VerifyEmailRequest(BaseModel):
+    code: str
+
+
+class VerifyEmailResponse(BaseModel):
+    success: bool
+    message: str
 
 
 class UserRegister(BaseModel):
@@ -40,6 +50,7 @@ class UserResponse(BaseModel):
     name: Optional[str]
     tier: str
     jobs_remaining: int
+    email_verified: bool = False
 
 
 class TokenResponse(BaseModel):
@@ -78,17 +89,24 @@ async def register(
             )
 
         # Create new user
+        import secrets
         user = User(
             email=user_data.email,
             password_hash=get_password_hash(user_data.password),
             name=user_data.name,
             tier="free",
-            jobs_remaining=5
+            jobs_remaining=5,
+            email_verified=False,
+            verification_code=secrets.token_urlsafe(16)[:8].upper(),
+            verification_expires=datetime.utcnow() + timedelta(hours=24)
         )
 
         db.add(user)
         db.commit()
         db.refresh(user)
+
+        # Send verification email (async-ish via background task would be better, but sync for now)
+        email_service.send_verification(user.email, user.verification_code, user.name)
 
         # Create token
         token = create_access_token({"sub": str(user.id)})
@@ -100,7 +118,8 @@ async def register(
                 email=user.email,
                 name=user.name,
                 tier=user.tier,
-                jobs_remaining=user.jobs_remaining
+                jobs_remaining=user.jobs_remaining,
+                email_verified=user.email_verified
             )
         )
     except HTTPException:
@@ -146,7 +165,8 @@ async def login(
             email=user.email,
             name=user.name,
             tier=user.tier,
-            jobs_remaining=user.jobs_remaining
+            jobs_remaining=user.jobs_remaining,
+            email_verified=user.email_verified
         )
     )
 
@@ -161,7 +181,8 @@ async def get_me(
         email=current_user.email,
         name=current_user.name,
         tier=current_user.tier,
-        jobs_remaining=current_user.jobs_remaining
+        jobs_remaining=current_user.jobs_remaining,
+        email_verified=current_user.email_verified
     )
 
 
@@ -193,8 +214,50 @@ async def update_me(
         email=current_user.email,
         name=current_user.name,
         tier=current_user.tier,
-        jobs_remaining=current_user.jobs_remaining
+        jobs_remaining=current_user.jobs_remaining,
+        email_verified=current_user.email_verified
     )
+
+
+@router.post("/verify-email", response_model=VerifyEmailResponse)
+async def verify_email(
+    request: VerifyEmailRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Verify email with code"""
+    if current_user.email_verified:
+        return VerifyEmailResponse(success=True, message="Email already verified")
+
+    if not current_user.verification_code or current_user.verification_code != request.code.upper():
+        raise HTTPException(status_code=400, detail="Invalid verification code")
+
+    if current_user.verification_expires and current_user.verification_expires < datetime.utcnow():
+        raise HTTPException(status_code=400, detail="Verification code expired")
+
+    current_user.email_verified = True
+    current_user.verification_code = None
+    current_user.verification_expires = None
+    db.commit()
+
+    return VerifyEmailResponse(success=True, message="Email verified successfully")
+
+
+@router.post("/resend-verification", response_model=VerifyEmailResponse)
+async def resend_verification(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Resend verification email"""
+    if current_user.email_verified:
+        return VerifyEmailResponse(success=True, message="Email already verified")
+
+    current_user.verification_code = secrets.token_urlsafe(16)[:8].upper()
+    current_user.verification_expires = datetime.utcnow() + timedelta(hours=24)
+    db.commit()
+
+    email_service.send_verification(current_user.email, current_user.verification_code, current_user.name)
+    return VerifyEmailResponse(success=True, message="Verification email sent")
 
 
 @router.post("/forgot-password", response_model=PasswordResetResponse)
@@ -217,9 +280,7 @@ async def forgot_password(
     user.reset_token_expires = datetime.utcnow() + timedelta(hours=24)
     db.commit()
 
-    # In production, send email here
-    # For now, return the token in the message for testing
-    print(f"Password reset token for {user.email}: {token}")
+    email_service.send_password_reset(user.email, token, user.name)
 
     return PasswordResetResponse(
         success=True,
