@@ -24,6 +24,7 @@ class SubscriptionStatus(str, Enum):
 
 class Feature(str, Enum):
     """Trackable features for usage"""
+    JOB_SCAN = "job.scan"
     CV_GENERATE = "cv.generate"
     RESUME_UPLOAD = "resume.upload"
     RESUME_ANALYZE = "resume.analyze"
@@ -53,6 +54,7 @@ PLAN_CONFIGS = {
         "price_monthly_cents": 0,
         "price_yearly_cents": 0,
         "limits": {
+            Feature.JOB_SCAN: 5,
             Feature.CV_GENERATE: 1,
             Feature.RESUME_UPLOAD: 2,
             Feature.RESUME_ANALYZE: 2,
@@ -63,8 +65,9 @@ PLAN_CONFIGS = {
             Feature.EXPORT_DOCX: 0,
         },
         "features": [
-            "basic_analysis",
-            "watermarked_pdf",
+            "5_job_scans",
+            "1_cv_generation",
+            "basic_resume_analysis",
             "email_support",
         ],
     },
@@ -73,19 +76,21 @@ PLAN_CONFIGS = {
         "price_monthly_cents": 900,
         "price_yearly_cents": 9000,
         "limits": {
-            Feature.CV_GENERATE: 10,
+            Feature.JOB_SCAN: 20,
+            Feature.CV_GENERATE: 5,
             Feature.RESUME_UPLOAD: 10,
             Feature.RESUME_ANALYZE: 10,
-            Feature.COVER_LETTER_GENERATE: 0,
+            Feature.COVER_LETTER_GENERATE: 5,
             Feature.INTERVIEW_PREP: 0,
             Feature.API_REQUEST: 0,
             Feature.EXPORT_PDF: 10,
             Feature.EXPORT_DOCX: 10,
         },
         "features": [
-            "full_analysis",
-            "no_watermark",
-            "docx_export",
+            "20_job_scans",
+            "5_cv_generations",
+            "full_resume_analysis",
+            "5_cover_letters",
             "priority_email_support",
         ],
     },
@@ -94,7 +99,8 @@ PLAN_CONFIGS = {
         "price_monthly_cents": 2900,
         "price_yearly_cents": 29000,
         "limits": {
-            Feature.CV_GENERATE: -1,  # Unlimited
+            Feature.JOB_SCAN: -1,  # Unlimited
+            Feature.CV_GENERATE: -1,
             Feature.RESUME_UPLOAD: -1,
             Feature.RESUME_ANALYZE: -1,
             Feature.COVER_LETTER_GENERATE: -1,
@@ -104,13 +110,14 @@ PLAN_CONFIGS = {
             Feature.EXPORT_DOCX: -1,
         },
         "features": [
-            "everything_in_starter",
-            "unlimited_cvs",
-            "cover_letters",
-            "interview_prep",
-            "analytics_dashboard",
+            "unlimited_job_scans",
+            "unlimited_cv_generations",
+            "advanced_ai_resume_scoring",
+            "unlimited_cover_letters",
+            "interview_prep_and_mock_questions",
+            "application_tracker",
+            "priority_chat_support",
             "api_access",
-            "priority_processing",
         ],
     },
     SubscriptionTier.TEAM: {
@@ -118,6 +125,7 @@ PLAN_CONFIGS = {
         "price_monthly_cents": 4900,
         "price_yearly_cents": 49000,
         "limits": {
+            Feature.JOB_SCAN: -1,
             Feature.CV_GENERATE: -1,
             Feature.RESUME_UPLOAD: -1,
             Feature.RESUME_ANALYZE: -1,
@@ -129,11 +137,12 @@ PLAN_CONFIGS = {
         },
         "features": [
             "everything_in_pro",
-            "client_management",
+            "up_to_5_team_members",
+            "shared_job_boards",
+            "team_analytics_dashboard",
+            "dedicated_account_manager",
             "white_label_exports",
-            "team_collaboration",
             "admin_analytics",
-            "dedicated_support",
         ],
     },
 }

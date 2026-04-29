@@ -244,9 +244,6 @@ export const apiClient = {
     });
     return handleResponse(res);
   },
-    });
-    return handleResponse(res);
-  },
 
   async updateProfile(name: string, phone?: string, location?: string, linkedin_url?: string, github_url?: string) {
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/auth/me`, {

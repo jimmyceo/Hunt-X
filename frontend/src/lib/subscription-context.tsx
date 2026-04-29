@@ -78,7 +78,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       if (!user?.id) {
         return { has_access: false, tier: 'free', remaining: 0, total: 0, unlimited: false };
       }
-      const data = await apiClient.checkFeature(user.id, feature);
+      const data = await apiClient.checkFeature(feature);
       if (data.status === 'success' && data.access) {
         return {
           has_access: data.access.has_access ?? false,
@@ -100,7 +100,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       if (!user?.id) {
         return { success: false, remaining: 0, unlimited: false };
       }
-      const data = await apiClient.consumeFeature(user.id, feature, amount);
+      const data = await apiClient.consumeFeature(feature, amount);
       if (data.status === 'success' && data.result) {
         // Refresh usage after consuming
         await refreshUsage();

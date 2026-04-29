@@ -2,19 +2,22 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Check, X, ArrowRight } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Check, X, Loader2 } from 'lucide-react'
+import { apiClient } from '@/lib/api'
 
 const plans = [
   {
     name: 'Free',
+    tier: 'free',
     monthlyPrice: 0,
     yearlyPrice: 0,
     description: 'Perfect for trying out Hunt-X',
     features: [
       { text: '5 job scans per month', included: true },
-      { text: '1 CV generation', included: true },
+      { text: '1 CV generation per month', included: true },
+      { text: '2 resume uploads & analysis', included: true },
       { text: 'Basic resume analysis', included: true },
-      { text: 'Email support', included: true },
       { text: 'Cover letter generation', included: false },
       { text: 'Interview prep', included: false },
       { text: 'Application tracker', included: false },
@@ -25,24 +28,26 @@ const plans = [
   },
   {
     name: 'Starter',
+    tier: 'starter',
     monthlyPrice: 9,
     yearlyPrice: 90,
     description: 'For active job seekers',
     features: [
       { text: '20 job scans per month', included: true },
-      { text: '5 CV generations', included: true },
+      { text: '5 CV generations per month', included: true },
+      { text: '10 resume uploads & analysis', included: true },
+      { text: '5 cover letters per month', included: true },
       { text: 'Full resume analysis', included: true },
-      { text: 'Cover letter generation', included: true },
       { text: 'Priority email support', included: true },
       { text: 'Interview prep', included: false },
       { text: 'Application tracker', included: false },
-      { text: 'API access', included: false },
     ],
     cta: 'Start Starter',
     ctaStyle: 'primary' as const,
   },
   {
     name: 'Pro',
+    tier: 'pro',
     monthlyPrice: 29,
     yearlyPrice: 290,
     description: 'For serious job hunters',
@@ -50,38 +55,51 @@ const plans = [
     features: [
       { text: 'Unlimited job scans', included: true },
       { text: 'Unlimited CV generations', included: true },
-      { text: 'Advanced AI resume scoring', included: true },
+      { text: 'Unlimited resume uploads', included: true },
       { text: 'Unlimited cover letters', included: true },
+      { text: 'Advanced AI resume scoring', included: true },
       { text: 'Interview prep & mock questions', included: true },
       { text: 'Application tracker', included: true },
       { text: 'Priority chat support', included: true },
-      { text: 'API access', included: false },
     ],
     cta: 'Start Pro',
     ctaStyle: 'primary' as const,
-  },
-  {
-    name: 'Team',
-    monthlyPrice: 49,
-    yearlyPrice: 490,
-    description: 'For teams & career coaches',
-    features: [
-      { text: 'Everything in Pro', included: true },
-      { text: 'Up to 5 team members', included: true },
-      { text: 'Shared job boards', included: true },
-      { text: 'Team analytics dashboard', included: true },
-      { text: 'Dedicated account manager', included: true },
-      { text: 'API access', included: true },
-      { text: 'White-label exports', included: true },
-      { text: 'Admin analytics', included: true },
-    ],
-    cta: 'Contact Sales',
-    ctaStyle: 'ghost' as const,
   },
 ]
 
 export default function PricingPage() {
   const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly')
+  const [loadingTier, setLoadingTier] = useState<string | null>(null)
+  const [error, setError] = useState('')
+  const router = useRouter()
+
+  const handleCheckout = async (tier: string) => {
+    if (tier === 'free') {
+      router.push('/upload')
+      return
+    }
+    setError('')
+    setLoadingTier(tier)
+    try {
+      const data = await apiClient.createCheckout(tier)
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url
+      } else if (data.status === 'success') {
+        // Free tier fallback
+        router.push('/upload')
+      } else {
+        setError('Unable to start checkout. Please try again.')
+      }
+    } catch (err: any) {
+      if (err.message?.includes('auth') || err.message?.includes('unauthorized')) {
+        router.push('/auth')
+      } else {
+        setError(err.message || 'Checkout failed. Please try again.')
+      }
+    } finally {
+      setLoadingTier(null)
+    }
+  }
 
   return (
     <main className="min-h-screen bg-[#0B0B0F] text-[#E8E8ED]">
@@ -132,16 +150,23 @@ export default function PricingPage() {
           {billing === 'yearly' && (
             <p className="text-xs text-[#00D26A] mt-2">Save 2 months free with yearly billing</p>
           )}
+
+          {error && (
+            <div className="mt-4 p-3 rounded-md bg-[#EF4444]/10 border border-[#EF4444]/20 text-[#EF4444] text-sm max-w-md mx-auto">
+              {error}
+            </div>
+          )}
         </div>
       </section>
 
       {/* Pricing Cards */}
       <section className="pb-16">
         <div className="max-w-[1200px] mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-4">
+          <div className="grid md:grid-cols-3 gap-4">
             {plans.map((plan) => {
               const price = billing === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice
               const period = billing === 'monthly' ? '/mo' : '/year'
+              const isLoading = loadingTier === plan.tier
               return (
                 <div
                   key={plan.name}
@@ -162,16 +187,24 @@ export default function PricingPage() {
                   </div>
                   <div className="text-base text-[#8A8F98] mb-4">{period}</div>
                   <p className="text-base text-[#8A8F98] mb-6">{plan.description}</p>
-                  <Link
-                    href={plan.name === 'Free' ? '/upload' : '/auth'}
-                    className={`block w-full py-3 text-center rounded-md text-sm font-medium transition-all duration-150 active:scale-[0.98] mb-6 ${
+                  <button
+                    onClick={() => handleCheckout(plan.tier)}
+                    disabled={isLoading}
+                    className={`block w-full py-3 text-center rounded-md text-sm font-medium transition-all duration-150 active:scale-[0.98] mb-6 disabled:opacity-50 ${
                       plan.ctaStyle === 'primary'
                         ? 'bg-[#3B82F6] text-white hover:bg-[#60A5FA] hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]'
                         : 'border border-white/[0.10] text-[#E8E8ED] hover:bg-white/[0.04] hover:border-white/[0.14]'
                     }`}
                   >
-                    {plan.cta}
-                  </Link>
+                    {isLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Redirecting...
+                      </span>
+                    ) : (
+                      plan.cta
+                    )}
+                  </button>
                   <ul className="space-y-3 flex-1">
                     {plan.features.map((feature) => (
                       <li key={feature.text} className="flex items-start gap-2 text-sm">
@@ -190,6 +223,21 @@ export default function PricingPage() {
               )
             })}
           </div>
+
+          {/* Team card */}
+          <div className="mt-4 p-8 rounded-lg border border-white/[0.06] bg-[#1A1A24] flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <div className="text-sm text-[#5A5E66] mb-1">Team</div>
+              <div className="text-2xl font-medium text-[#E8E8ED] mb-1">&euro;49<span className="text-base text-[#8A8F98]">/mo</span></div>
+              <p className="text-sm text-[#8A8F98]">For teams & career coaches. Everything in Pro plus up to 5 members, shared job boards, team analytics, and dedicated support.</p>
+            </div>
+            <a
+              href="mailto:support@hunt-x.app?subject=Team%20Plan%20Inquiry"
+              className="shrink-0 px-6 py-3 border border-white/[0.10] text-[#E8E8ED] rounded-md hover:bg-white/[0.04] hover:border-white/[0.14] transition-all duration-150 text-sm font-medium"
+            >
+              Contact Sales
+            </a>
+          </div>
         </div>
       </section>
 
@@ -205,27 +253,25 @@ export default function PricingPage() {
                   <th className="text-center p-4 font-medium text-[#E8E8ED]">Free</th>
                   <th className="text-center p-4 font-medium text-[#E8E8ED]">Starter</th>
                   <th className="text-center p-4 font-medium text-[#00D26A]">Pro</th>
-                  <th className="text-center p-4 font-medium text-[#00D26A]">Team</th>
                 </tr>
               </thead>
               <tbody>
                 {[
-                  { feature: 'Job Scans', free: '5/mo', starter: '20/mo', pro: 'Unlimited', team: 'Unlimited' },
-                  { feature: 'CV Generations', free: '1/mo', starter: '5/mo', pro: 'Unlimited', team: 'Unlimited' },
-                  { feature: 'Resume Analysis', free: 'Basic', starter: 'Full', pro: 'Advanced AI', team: 'Advanced AI' },
-                  { feature: 'Cover Letters', free: '—', starter: '5/mo', pro: 'Unlimited', team: 'Unlimited' },
-                  { feature: 'Interview Prep', free: '—', starter: '—', pro: 'Included', team: 'Included' },
-                  { feature: 'App Tracker', free: '—', starter: '—', pro: 'Included', team: 'Included' },
-                  { feature: 'Team Members', free: '—', starter: '—', pro: '—', team: 'Up to 5' },
-                  { feature: 'API Access', free: '—', starter: '—', pro: '—', team: 'Included' },
-                  { feature: 'Support', free: 'Email', starter: 'Priority Email', pro: 'Priority Chat', team: 'Dedicated' },
+                  { feature: 'Job Scans', free: '5/mo', starter: '20/mo', pro: 'Unlimited' },
+                  { feature: 'CV Generations', free: '1/mo', starter: '5/mo', pro: 'Unlimited' },
+                  { feature: 'Resume Uploads', free: '2', starter: '10/mo', pro: 'Unlimited' },
+                  { feature: 'Resume Analysis', free: 'Basic', starter: 'Full', pro: 'Advanced AI' },
+                  { feature: 'Cover Letters', free: '—', starter: '5/mo', pro: 'Unlimited' },
+                  { feature: 'Interview Prep', free: '—', starter: '—', pro: 'Included' },
+                  { feature: 'App Tracker', free: '—', starter: '—', pro: 'Included' },
+                  { feature: 'API Access', free: '—', starter: '—', pro: '1,000/mo' },
+                  { feature: 'Support', free: 'Email', starter: 'Priority Email', pro: 'Priority Chat' },
                 ].map((row, i) => (
                   <tr key={row.feature} className={i % 2 === 0 ? 'bg-[#1A1A24]' : 'bg-[#12121A]'}>
                     <td className="p-4 text-[#8A8F98]">{row.feature}</td>
                     <td className="p-4 text-center text-[#8A8F98]">{row.free}</td>
                     <td className="p-4 text-center text-[#8A8F98]">{row.starter}</td>
                     <td className="p-4 text-center text-[#00D26A]">{row.pro}</td>
-                    <td className="p-4 text-center text-[#00D26A]">{row.team}</td>
                   </tr>
                 ))}
               </tbody>
