@@ -131,7 +131,7 @@ async def register(
             jobs_remaining=5,
             email_verified=False,
             verification_code=secrets.token_urlsafe(16)[:8].upper(),
-            verification_expires=datetime.utcnow() + timedelta(hours=24)
+            verification_expires=datetime.now(datetime.timezone.utc) + timedelta(hours=24)
         )
 
         db.add(user)
@@ -267,7 +267,7 @@ async def verify_email(
     if not current_user.verification_code or current_user.verification_code != request.code.upper():
         raise HTTPException(status_code=400, detail="Invalid verification code")
 
-    if current_user.verification_expires and current_user.verification_expires < datetime.utcnow():
+    if current_user.verification_expires and current_user.verification_expires < datetime.now(datetime.timezone.utc):
         raise HTTPException(status_code=400, detail="Verification code expired")
 
     current_user.email_verified = True
@@ -288,7 +288,7 @@ async def resend_verification(
         return VerifyEmailResponse(success=True, message="Email already verified")
 
     current_user.verification_code = secrets.token_urlsafe(16)[:8].upper()
-    current_user.verification_expires = datetime.utcnow() + timedelta(hours=24)
+    current_user.verification_expires = datetime.now(datetime.timezone.utc) + timedelta(hours=24)
     db.commit()
 
     email_service.send_verification(current_user.email, current_user.verification_code, current_user.name)
@@ -314,7 +314,7 @@ async def forgot_password(
     # Generate secure token
     token = secrets.token_urlsafe(32)
     user.reset_token = token
-    user.reset_token_expires = datetime.utcnow() + timedelta(hours=24)
+    user.reset_token_expires = datetime.now(datetime.timezone.utc) + timedelta(hours=24)
     db.commit()
 
     email_service.send_password_reset(user.email, token, user.name)
@@ -333,7 +333,7 @@ async def reset_password(
     """Reset password with token"""
     user = db.query(User).filter(
         User.reset_token == request.token,
-        User.reset_token_expires > datetime.utcnow()
+        User.reset_token_expires > datetime.now(datetime.timezone.utc)
     ).first()
 
     if not user:
