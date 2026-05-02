@@ -100,7 +100,7 @@ class STARStory(BaseModel):
 class BlockF(BaseModel):
     star_stories: List[STARStory]
     red_flags: List[dict]
-    case_study: dict
+    case_study: str
     questions_to_ask: List[str]
 
 
@@ -466,7 +466,7 @@ def _db_to_response(evaluation: Evaluation) -> EvaluationResponse:
         block_f=BlockF(
             star_stories=[],
             red_flags=[],
-            case_study={},
+            case_study="",
             questions_to_ask=[]
         ),
         global_score=float(evaluation.global_score) if evaluation.global_score else 0,
