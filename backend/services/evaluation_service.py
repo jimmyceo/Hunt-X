@@ -236,13 +236,22 @@ class EvaluationService:
         # Block D
         block_d_data = response.get("block_d", {})
         salary_data = block_d_data.get("salary_range", {})
+        # Ensure market_data is always a dict
+        raw_market_data = block_d_data.get("market_data", {})
+        if isinstance(raw_market_data, str):
+            market_data = {"analysis": raw_market_data}
+        elif isinstance(raw_market_data, dict):
+            market_data = raw_market_data
+        else:
+            market_data = {}
+
         block_d = BlockD(
             salary_range=CompensationData(
                 min=salary_data.get("min", 0),
                 max=salary_data.get("max", 0),
                 currency=salary_data.get("currency", "EUR")
             ),
-            market_data=block_d_data.get("market_data", {}),
+            market_data=market_data,
             company_reputation=block_d_data.get("company_reputation", "")
         )
 
