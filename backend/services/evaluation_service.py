@@ -92,6 +92,7 @@ class STARStory:
     action: str
     result: str
     reflection: str
+    estimated_duration: str
 
 
 @dataclass
