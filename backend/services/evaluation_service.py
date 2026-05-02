@@ -272,7 +272,8 @@ class EvaluationService:
                 task=s.get("task", s.get("T", "")),
                 action=s.get("action", s.get("A", "")),
                 result=s.get("result", s.get("R", "")),
-                reflection=s.get("reflection", s.get("R_plus", ""))
+                reflection=s.get("reflection", s.get("R_plus", "")),
+                estimated_duration=s.get("estimated_duration", "")
             )
             for s in block_f_data.get("star_stories", [])
         ]
