@@ -65,9 +65,10 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS middleware - configurable origins for security
-_cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
-# Allow all in development; restrict in production
-if os.getenv("ENVIRONMENT", "development").lower() == "production":
+_cors_origins = os.getenv("CORS_ORIGINS") or os.getenv("CORS_ORIGIN", "http://localhost:3000,http://127.0.0.1:3000")
+# Detect production via ENVIRONMENT or RAILWAY_ENVIRONMENT
+_is_production = os.getenv("ENVIRONMENT", os.getenv("RAILWAY_ENVIRONMENT", "development")).lower() == "production"
+if _is_production:
     allowed_origins = [origin.strip() for origin in _cors_origins.split(",") if origin.strip()]
 else:
     allowed_origins = ["*"]
