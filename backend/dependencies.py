@@ -42,10 +42,10 @@ def get_password_hash(password: str) -> str:
 
 def create_access_token(data: dict, remember_me: bool = False) -> str:
     """Create JWT access token"""
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
     to_encode = data.copy()
     minutes = ACCESS_TOKEN_EXPIRE_MINUTES * 30 if remember_me else ACCESS_TOKEN_EXPIRE_MINUTES
-    expire = datetime.now(datetime.timezone.utc) + timedelta(minutes=minutes)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=minutes)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
