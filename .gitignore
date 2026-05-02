@@ -37,3 +37,8 @@ temp/
 frontend/out/
 
 frontend/out/
+
+# Playwright
+frontend/e2e-report/
+frontend/test-results/
+frontend/playwright/.cache/

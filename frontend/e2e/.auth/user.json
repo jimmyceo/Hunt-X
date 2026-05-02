@@ -1,0 +1,14 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "https://frontend-eight-nu-89.vercel.app",
+      "localStorage": [
+        {
+          "name": "token",
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhMTZjYmE4Ni1mYzcwLTRmYWUtODhlYS0zOWJhMWUwOTVmNTEiLCJleHAiOjE3Nzc4MTY4MDh9.GWj5ymQWSNq1qGniZij8aA0vAAElobESCqUfg_DKP6k"
+        }
+      ]
+    }
+  ]
+}
