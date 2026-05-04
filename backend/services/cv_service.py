@@ -2,6 +2,7 @@
 CV generation service
 """
 
+import json
 from typing import Optional, List
 import uuid
 from dataclasses import dataclass
