@@ -11,6 +11,8 @@ import uuid
 import os
 from pathlib import Path
 
+from pypdf import PdfReader
+
 from models import get_db, User, Resume
 from dependencies import get_current_user, get_resume_pdf_service
 from services.resume_pdf_service import ResumePDFService
@@ -79,9 +81,19 @@ async def upload_resume(
     with open(file_path, "wb") as f:
         f.write(content)
 
-    # Parse resume (placeholder - implement actual parsing)
-    # TODO: Implement actual resume parsing (PyPDF2, python-docx, etc.)
-    resume_text = "Parsed resume text would go here"
+    # Parse resume — extract text from PDF
+    try:
+        reader = PdfReader(str(file_path))
+        resume_text = ""
+        for page in reader.pages:
+            page_text = page.extract_text()
+            if page_text:
+                resume_text += page_text + "\n"
+        if not resume_text.strip():
+            resume_text = "[No text extracted from PDF — image-based or scanned document]"
+    except Exception as e:
+        logging.getLogger("hunt-x").error(f"PDF text extraction failed: {e}")
+        resume_text = "[PDF parsing error — please ensure the file is a valid text-based PDF]"
 
     # AI analysis
     from ai.client import AIClient

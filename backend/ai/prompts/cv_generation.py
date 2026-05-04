@@ -20,6 +20,12 @@ EVALUATION DATA:
 
 ---
 
+## CRITICAL RULES
+
+- **Use ONLY the candidate's real name, contact info, experience, and education from the CANDIDATE CV above.**
+- **DO NOT invent or hallucinate any details.** If a detail is missing, leave it blank or use generic placeholders like [Your Phone].
+- **Never use placeholder names like "Jane Doe" or "John Smith" unless the CV text actually contains them.**
+
 ## TASK: Generate ATS-Optimized CV
 
 Create a professional CV in clean HTML format that:
