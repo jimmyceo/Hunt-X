@@ -62,7 +62,7 @@ Create a professional CV in clean HTML format that:
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>{name} - CV</title>
+  <title>{{name}} - CV</title>
   <style>
     body {{ font-family: Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 40px; }}
     h1 {{ font-size: 24px; margin-bottom: 5px; }}
@@ -78,26 +78,26 @@ Create a professional CV in clean HTML format that:
   </style>
 </head>
 <body>
-  <h1>{full_name}</h1>
+  <h1>{{full_name}}</h1>
   <div class="contact">
-    {location} | {email} | {phone} | {linkedin} | {github}
+    {{location}} | {{email}} | {{phone}} | {{linkedin}} | {{github}}
   </div>
 
   <h2>SUMMARY</h2>
-  <p>{tailored_summary}</p>
+  <p>{{tailored_summary}}</p>
 
   <h2>EXPERIENCE</h2>
-  {experience_section}
+  {{experience_section}}
 
   <h2>PROJECTS</h2>
-  {projects_section}
+  {{projects_section}}
 
   <h2>EDUCATION</h2>
-  {education_section}
+  {{education_section}}
 
   <h2>SKILLS</h2>
   <div class="skills">
-    {skills_list}
+    {{skills_list}}
   </div>
 </body>
 </html>
