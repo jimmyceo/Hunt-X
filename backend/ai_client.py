@@ -21,7 +21,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Model configuration
-PRIMARY_MODEL = "claude-3-5-haiku-20241022"
+PRIMARY_MODEL = "claude-3-5-haiku-latest"
 FALLBACK_MODEL = "gpt-4o-mini"
 
 # API Configuration

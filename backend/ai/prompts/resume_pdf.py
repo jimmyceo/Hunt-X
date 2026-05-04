@@ -71,10 +71,10 @@ USER CONTACT INFO:
   <meta charset="UTF-8">
   <title>{full_name} - Resume</title>
   <style>
-    @page { margin: 0.75in; }
-    * { box-sizing: border-box; }
+    @page {{ margin: 0.75in; }}
+    * {{ box-sizing: border-box; }}
 
-    body {
+    body {{
       font-family: 'Arial', sans-serif;
       font-size: 10.5pt;
       line-height: 1.4;
@@ -82,33 +82,33 @@ USER CONTACT INFO:
       max-width: 8.5in;
       margin: 0 auto;
       padding: 0;
-    }
+    }}
 
-    .header {
+    .header {{
       text-align: center;
       margin-bottom: 15px;
       border-bottom: 2px solid #2c5aa0;
       padding-bottom: 10px;
-    }
+    }}
 
-    .name {
+    .name {{
       font-size: 20pt;
       font-weight: bold;
       color: #2c5aa0;
       margin-bottom: 5px;
-    }
+    }}
 
-    .contact {
+    .contact {{
       font-size: 10pt;
       color: #666;
-    }
+    }}
 
-    .contact a {
+    .contact a {{
       color: #2c5aa0;
       text-decoration: none;
-    }
+    }}
 
-    h2 {
+    h2 {{
       font-size: 12pt;
       color: #2c5aa0;
       border-bottom: 1px solid #ccc;
@@ -117,74 +117,74 @@ USER CONTACT INFO:
       padding-bottom: 3px;
       text-transform: uppercase;
       letter-spacing: 1px;
-    }
+    }}
 
-    .summary {
+    .summary {{
       text-align: justify;
       margin-bottom: 10px;
-    }
+    }}
 
-    .skills {
+    .skills {{
       margin-bottom: 10px;
-    }
+    }}
 
-    .skill-category {
+    .skill-category {{
       margin-bottom: 5px;
-    }
+    }}
 
-    .skill-category strong {
+    .skill-category strong {{
       color: #555;
-    }
+    }}
 
-    .job {
+    .job {{
       margin-bottom: 12px;
-    }
+    }}
 
-    .job-header {
+    .job-header {{
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-    }
+    }}
 
-    .job-title {
+    .job-title {{
       font-weight: bold;
       font-size: 11pt;
-    }
+    }}
 
-    .job-company {
+    .job-company {{
       font-weight: bold;
-    }
+    }}
 
-    .job-date {
+    .job-date {{
       font-style: italic;
       color: #666;
       font-size: 10pt;
-    }
+    }}
 
-    .job-location {
+    .job-location {{
       font-size: 9.5pt;
       color: #666;
       margin-bottom: 3px;
-    }
+    }}
 
-    ul {
+    ul {{
       margin: 5px 0;
       padding-left: 20px;
-    }
+    }}
 
-    li {
+    li {{
       margin-bottom: 3px;
-    }
+    }}
 
-    .education-item {
+    .education-item {{
       margin-bottom: 8px;
-    }
+    }}
 
-    .cert-grid {
+    .cert-grid {{
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 5px;
-    }
+    }}
   </style>
 </head>
 <body>

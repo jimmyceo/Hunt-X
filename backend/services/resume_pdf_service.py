@@ -76,7 +76,7 @@ class ResumePDFService:
         pdf_filename = f"resume_{uuid.uuid4().hex[:8]}.pdf"
         pdf_path = self.output_dir / pdf_filename
 
-        await generate_pdf_from_html(html_content, str(pdf_path))
+        generate_pdf_from_html(html_content, str(pdf_path))
 
         # Estimate pages (rough heuristic)
         word_count = len(resume_text.split())
@@ -124,6 +124,6 @@ class ResumePDFService:
 
         pdf_path = self.output_dir / filename
 
-        await generate_pdf_from_html(cover_letter_html, str(pdf_path))
+        generate_pdf_from_html(cover_letter_html, str(pdf_path))
 
         return str(pdf_path)
