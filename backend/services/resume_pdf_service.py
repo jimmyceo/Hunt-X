@@ -106,7 +106,7 @@ class ResumePDFService:
 
         pdf_path = self.output_dir / filename
 
-        await generate_pdf_from_html(cv_html, str(pdf_path))
+        generate_pdf_from_html(cv_html, str(pdf_path))
 
         return str(pdf_path)
 
