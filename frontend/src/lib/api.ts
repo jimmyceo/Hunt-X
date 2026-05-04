@@ -209,6 +209,7 @@ export const apiClient = {
 
   // ============ CV ============
   async generateCV(evaluationId: string, template?: string) {
+    // CV generation can take 20-45s due to AI processing
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/cv/generate`, {
       method: 'POST',
       headers: jsonHeaders(),
@@ -216,7 +217,7 @@ export const apiClient = {
         evaluation_id: evaluationId,
         template,
       }),
-    });
+    }, 60000);
     return handleResponse(res);
   },
 
@@ -332,11 +333,12 @@ export const apiClient = {
 
   // ============ INTERVIEW PREP ============
   async generateInterviewPrep(evaluationId: string) {
+    // Interview prep can take 20-45s due to AI processing
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/interview/prep`, {
       method: 'POST',
       headers: jsonHeaders(),
       body: JSON.stringify({ evaluation_id: evaluationId }),
-    });
+    }, 60000);
     return handleResponse(res);
   },
 
@@ -405,6 +407,7 @@ export const apiClient = {
 
   // ============ COVER LETTERS ============
   async generateCoverLetter(evaluationId: string, hiringManagerName?: string, shortVersion?: boolean) {
+    // Cover letter generation can take 20-45s due to AI processing
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/cover-letter/generate`, {
       method: 'POST',
       headers: jsonHeaders(),
@@ -413,7 +416,7 @@ export const apiClient = {
         hiring_manager_name: hiringManagerName,
         short_version: shortVersion,
       }),
-    });
+    }, 60000);
     return handleResponse(res);
   },
 
@@ -568,11 +571,12 @@ export const apiClient = {
 
   // ============ RESUME ROASTER ============
   async roastResume(resumeId: string, tone: string = 'gentle') {
+    // Resume roast can take 20-45s due to AI processing
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/roaster/`, {
       method: 'POST',
       headers: jsonHeaders(),
       body: JSON.stringify({ resume_id: resumeId, tone }),
-    });
+    }, 60000);
     return handleResponse(res);
   },
 
