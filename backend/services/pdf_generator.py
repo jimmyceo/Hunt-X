@@ -20,7 +20,9 @@ def generate_pdf_from_html(cv_html: str, cv_id: str) -> str:
 
     # For now, save HTML and return path
     # PDF conversion can be done client-side with browser print
-    html_path = UPLOAD_DIR / f"{cv_id}.html"
+    # cv_id may include directory path; use only the filename stem
+    filename = Path(cv_id).name
+    html_path = UPLOAD_DIR / f"{Path(filename).stem}.html"
 
     full_html = f"""
     <!DOCTYPE html>
