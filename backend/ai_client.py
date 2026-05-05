@@ -82,10 +82,11 @@ async def _call_anthropic(
     prompt: str,
     system: str = "You are a helpful assistant.",
     user_id: str = "anonymous",
-    max_tokens: int = 4096
+    max_tokens: int = 4096,
+    model: str = PRIMARY_MODEL
 ) -> Tuple[str, int, int]:
     """
-    Call Anthropic API (Haiku 3.5) - PRIMARY MODEL
+    Call Anthropic API.
     Returns: (content, input_tokens, output_tokens)
     Raises AnthropicError on failure
     """
@@ -97,7 +98,7 @@ async def _call_anthropic(
         }
 
         data = {
-            "model": PRIMARY_MODEL,
+            "model": model,
             "max_tokens": max_tokens,
             "system": system,
             "messages": [{"role": "user", "content": prompt}]
@@ -125,7 +126,7 @@ async def _call_anthropic(
         input_tokens = usage.get("input_tokens", 0)
         output_tokens = usage.get("output_tokens", 0)
 
-        _log_model_usage(PRIMARY_MODEL, input_tokens, output_tokens, user_id, "success")
+        _log_model_usage(model, input_tokens, output_tokens, user_id, "success")
         return content, input_tokens, output_tokens
 
     except httpx.RequestError as e:
@@ -138,10 +139,11 @@ async def _call_openai(
     prompt: str,
     system: str = "You are a helpful assistant.",
     user_id: str = "anonymous",
-    max_tokens: int = 4096
+    max_tokens: int = 4096,
+    model: str = FALLBACK_MODEL
 ) -> Tuple[str, int, int]:
     """
-    Call OpenAI API (GPT-4o-mini) - FALLBACK MODEL
+    Call OpenAI API.
     Returns: (content, input_tokens, output_tokens)
     Raises OpenAIError on failure
     """
@@ -152,7 +154,7 @@ async def _call_openai(
         }
 
         data = {
-            "model": FALLBACK_MODEL,
+            "model": model,
             "messages": [
                 {"role": "system", "content": system},
                 {"role": "user", "content": prompt}
@@ -176,7 +178,7 @@ async def _call_openai(
         input_tokens = usage.get("prompt_tokens", 0)
         output_tokens = usage.get("completion_tokens", 0)
 
-        _log_model_usage(FALLBACK_MODEL, input_tokens, output_tokens, user_id, "success")
+        _log_model_usage(model, input_tokens, output_tokens, user_id, "success")
         return content, input_tokens, output_tokens
 
     except httpx.RequestError as e:
@@ -212,9 +214,9 @@ async def ai_query(
     async def _try_model(model: str) -> str:
         """Route to correct API based on model name."""
         if "claude" in model.lower():
-            content, inp, out = await _call_anthropic(prompt, system, user_id, max_tokens)
+            content, inp, out = await _call_anthropic(prompt, system, user_id, max_tokens, model)
         else:
-            content, inp, out = await _call_openai(prompt, system, user_id, max_tokens)
+            content, inp, out = await _call_openai(prompt, system, user_id, max_tokens, model)
         return content
 
     # Try PRIMARY model first (unless force_fallback)
