@@ -209,27 +209,29 @@ async def ai_query(
     Returns:
         AI response content
     """
+    async def _try_model(model: str) -> str:
+        """Route to correct API based on model name."""
+        if "claude" in model.lower():
+            content, inp, out = await _call_anthropic(prompt, system, user_id, max_tokens)
+        else:
+            content, inp, out = await _call_openai(prompt, system, user_id, max_tokens)
+        return content
+
     # Try PRIMARY model first (unless force_fallback)
     if not force_fallback:
         try:
             logger.info(f"[AI] Attempting primary model: {PRIMARY_MODEL}")
-            content, input_tokens, output_tokens = await _call_anthropic(
-                prompt, system, user_id, max_tokens
-            )
-            return content
-        except AnthropicError as e:
+            return await _try_model(PRIMARY_MODEL)
+        except (AnthropicError, OpenAIError) as e:
             logger.warning(f"[AI] Primary model failed: {e}. Falling back to {FALLBACK_MODEL}")
             _model_usage_stats[PRIMARY_MODEL]["errors"] += 1
             # Continue to fallback
 
-    # FALLBACK model (on AnthropicError or if force_fallback)
+    # FALLBACK model (on error or if force_fallback)
     try:
         logger.info(f"[AI] Using fallback model: {FALLBACK_MODEL}")
-        content, input_tokens, output_tokens = await _call_openai(
-            prompt, system, user_id, max_tokens
-        )
-        return content
-    except OpenAIError as e:
+        return await _try_model(FALLBACK_MODEL)
+    except (AnthropicError, OpenAIError) as e:
         logger.error(f"[AI] Fallback model also failed: {e}")
         _model_usage_stats[FALLBACK_MODEL]["errors"] += 1
         return f"AI Service Error: Both primary and fallback models failed. {e}"
