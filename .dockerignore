@@ -1,0 +1,25 @@
+# Tests
+backend/tests/
+frontend/e2e/
+
+# Dev tooling and docs
+non-production/
+*.md
+
+# Git/GitHub
+.github/
+.git/
+.gitignore
+
+# Build artifacts
+frontend/out/
+frontend/.next/
+
+# Local environment files
+.env
+.env.*
+
+# Python cache
+__pycache__/
+*.pyc
+venv/

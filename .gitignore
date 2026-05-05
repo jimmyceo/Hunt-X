@@ -36,9 +36,13 @@ temp/
 .vercel
 frontend/out/
 
-frontend/out/
-
 # Playwright
 frontend/e2e-report/
 frontend/test-results/
 frontend/playwright/.cache/
+
+# Claude plans
+.claude/plans/
+
+# Graphify cache (regenerated, not needed in git)
+non-production/tools/graphify-out/cache/
