@@ -197,29 +197,29 @@ USER CONTACT INFO:
   </div>
 
   <h2>Professional Summary</h2>
-  <div class="summary">{professional_summary}</div>
+  <div class="summary">{{professional_summary}}</div>
 
   <h2>Technical Skills</h2>
   <div class="skills">
-    {skills_section}
+    {{skills_section}}
   </div>
 
   <h2>Professional Experience</h2>
-  {experience_section}
+  {{experience_section}}
 
   <h2>Projects</h2>
-  {projects_section}
+  {{projects_section}}
 
   <h2>Education</h2>
-  {education_section}
+  {{education_section}}
 
   <h2>Certifications</h2>
   <div class="cert-grid">
-    {certifications_section}
+    {{certifications_section}}
   </div>
 
   <h2>Languages</h2>
-  {languages_section}
+  {{languages_section}}
 </body>
 </html>
 ```

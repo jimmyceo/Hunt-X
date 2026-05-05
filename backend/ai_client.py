@@ -21,8 +21,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Model configuration
-PRIMARY_MODEL = "claude-3-5-haiku-latest"
-FALLBACK_MODEL = "gpt-4o-mini"
+PRIMARY_MODEL = "gpt-4o-mini"
+FALLBACK_MODEL = "claude-3-5-haiku-latest"
 
 # API Configuration
 ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY', '')
@@ -253,7 +253,16 @@ async def ai_query_json(
     response = await ai_query(prompt, system, user_id, max_tokens)
 
     try:
-        return json.loads(response)
+        # Strip markdown code fences if present
+        cleaned = response.strip()
+        if cleaned.startswith("```json"):
+            cleaned = cleaned[7:]
+        elif cleaned.startswith("```"):
+            cleaned = cleaned[3:]
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3]
+        cleaned = cleaned.strip()
+        return json.loads(cleaned)
     except json.JSONDecodeError as e:
         logger.error(f"[AI] Failed to parse JSON response: {e}")
         return {"error": "Invalid JSON response", "raw_response": response}

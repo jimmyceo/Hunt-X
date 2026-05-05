@@ -64,21 +64,21 @@ Rules:
   <meta charset="UTF-8">
   <title>Cover Letter - {name}</title>
   <style>
-    body {
+    body {{
       font-family: 'Georgia', serif;
       line-height: 1.6;
       max-width: 700px;
       margin: 40px auto;
       padding: 40px;
       color: #333;
-    }
-    .header { margin-bottom: 30px; }
-    .date { color: #666; margin-bottom: 20px; }
-    .recipient { margin-bottom: 20px; }
-    .salutation { margin-bottom: 20px; }
-    .paragraph { margin-bottom: 20px; text-align: justify; }
-    .closing { margin-top: 30px; }
-    .signature { margin-top: 50px; }
+    }}
+    .header {{ margin-bottom: 30px; }}
+    .date {{ color: #666; margin-bottom: 20px; }}
+    .recipient {{ margin-bottom: 20px; }}
+    .salutation {{ margin-bottom: 20px; }}
+    .paragraph {{ margin-bottom: 20px; text-align: justify; }}
+    .closing {{ margin-top: 30px; }}
+    .signature {{ margin-top: 50px; }}
   </style>
 </head>
 <body>
