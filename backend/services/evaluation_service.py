@@ -302,6 +302,17 @@ class EvaluationService:
             questions_to_ask=block_f_data.get("questions_to_ask", [])
         )
 
+        # Compute global_score from matches if AI omitted it
+        raw_score = response.get("global_score")
+        if raw_score is None or raw_score == 0:
+            if block_b.matches:
+                avg_strength = sum(m.strength for m in block_b.matches) / len(block_b.matches)
+                global_score = round(avg_strength, 1)
+            else:
+                global_score = 0.0
+        else:
+            global_score = float(raw_score)
+
         return EvaluationResult(
             block_a=block_a,
             block_b=block_b,
@@ -309,7 +320,7 @@ class EvaluationService:
             block_d=block_d,
             block_e=block_e,
             block_f=block_f,
-            global_score=float(response.get("global_score", 0)),
+            global_score=global_score,
             recommendation=response.get("recommendation", "")
         )
 
